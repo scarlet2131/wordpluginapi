@@ -1,6 +1,7 @@
 /* global document, Office, Word */
 import axios from 'axios';
-import { jwtdecode } from "jwt-decode";
+// import { jwtdecode } from "jwt-decode";
+import { jwtDecode, JwtPayload } from 'jwt-decode'
 
 
 
@@ -51,7 +52,7 @@ Office.onReady((info) => {
       let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
         allowSignInPrompt: true,
       });
-      let userToken = jwtdecode(userTokenEncoded, { complete: true });
+      let userToken = jwtDecode(userTokenEncoded, { complete: true });
     //   jwt.default.decode(token, { complete: true });
       document.getElementById("userInfo").innerHTML =
         "name: " +
