@@ -4,7 +4,7 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
   <Id>62709012-a14e-4da7-a40a-f538e50d0a4b</Id>
-  <Version>1.1.0.1</Version>
+  <Version>1.2.0.9</Version>
   <ProviderName>Contoso</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="wordAdd-In" />
