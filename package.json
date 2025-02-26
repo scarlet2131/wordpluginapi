@@ -32,6 +32,7 @@
     "crypto-browserify": "^3.12.1",
     "docxtemplater": "^3.60.0",
     "https-browserify": "^1.0.0",
+    "jwt-decode": "^4.0.0",
     "pizzip": "^3.1.8",
     "regenerator-runtime": "^0.14.1",
     "stream-browserify": "^3.0.0",

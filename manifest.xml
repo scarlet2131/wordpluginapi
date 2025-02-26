@@ -94,8 +94,9 @@
       <Resource>api://wonderful-mud-072c2710f.6.azurestaticapps.net/2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource>
       <!-- <Resource>https://graph.microsoft.com</Resource> -->
       <Scopes>
-        <Scope>User.Read</Scope>
-        <Scope>email</Scope>
+         <Scope>openid</Scope>
+        <Scope>user.read</Scope>
+        <Scope>profile</Scope>
       </Scopes>
     </WebApplicationInfo>
   </VersionOverrides>

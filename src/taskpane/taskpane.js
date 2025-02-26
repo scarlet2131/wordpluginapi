@@ -1,5 +1,9 @@
 /* global document, Office, Word */
 import axios from 'axios';
+// import jwt_decode from "jwt-decode";
+import jwtDecode from "jwt-decode";
+
+
 
 
 let currentPlaceholders = {};
@@ -36,6 +40,40 @@ Office.onReady((info) => {
         // initialize();
     }
 });
+
+
+Office.onReady((info) => {
+    if (info.host === Office.HostType.Excel) {
+      document.getElementById("getIDToken").onclick = getIDToken;
+    }
+  });
+  
+  async function getIDToken() {
+    try {
+      let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
+        allowSignInPrompt: true,
+      });
+      let userToken = jwtDecode(userTokenEncoded);
+      document.getElementById("userInfo").innerHTML =
+        "name: " +
+        userToken.name +
+        "<br>email: " +
+        userToken.preferred_username +
+        "<br>id: " +
+        userToken.oid;
+      console.log(userToken);
+    } catch (error) {
+      document.getElementById("userInfo").innerHTML =
+        "An error occurred. <br>Name: " +
+        error.name +
+        "<br>Code: " +
+        error.code +
+        "<br>Message: " +
+        error.message;
+      console.log(error);
+    }
+  }
+  
 
 async function getUserEmail() {
 

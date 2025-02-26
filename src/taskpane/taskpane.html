@@ -12,6 +12,8 @@
     <!-- PizZip and Docxtemplater from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.min.js"></script>
+    <!-- <script src="Scripts/jwt-decode-2.2.0.js" type="text/javascript"></script> -->
+
 
 
     <!-- Fluent UI -->
@@ -30,6 +32,17 @@
     </header>
 
     <main class="main-content">
+
+
+        <h1>Welcome</h1>
+        <p>
+            Sign in to Office, then choose the <b>Get ID Token</b> button to see your
+            ID token information.
+        </p>
+        <button id="getIDToken">Get ID Token</button>
+        <div>
+            <span id="userInfo"></span>
+        </div>
         
         <!-- Admin Page (Hidden by Default) -->
         <div id="adminPage" style="display: none;">
