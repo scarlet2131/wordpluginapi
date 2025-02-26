@@ -204,12 +204,6 @@ async function extractPlaceholdersFromDocument(context) {
 // --------------------- now we are working on the login functionality ---------------------------
 
 
-// Ensure Office is ready before running your code.
-Office.onReady((info) => {
-  if (info.host === Office.HostType.Word) {
-    initializeTaskPane();
-  }
-});
 
 // Main initialization: get user email and toggle admin UI.
 async function initializeTaskPane() {
@@ -226,49 +220,82 @@ async function initializeTaskPane() {
     insertDebugMessage(`Error initializing task pane: " + ${error.message}`);
   }
 }
-Office.initialize = function (reason) {
-    $(function () { 
-        insertDebugMessage("prii em al   ", Office.context.mailbox.userProfile.emailAddress);
-    }
-}
-// Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
-function getUserEmail() {
-        insertDebugMessage("inside get userPrompt: " );
 
+
+// Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
+// function getUserEmail() {
+//         insertDebugMessage("inside get userPrompt: " );
+
+//   return new Promise((resolve, reject) => {
+//     Office.context.auth.getAccessTokenAsync((result) => {
+//       if (result.status === Office.AsyncResultStatus.Succeeded) {
+//         const token = result.value;
+//             insertDebugMessage(`do we have the token ${token}`);
+
+//         // Call Microsoft Graph to get the user's profile.
+//         fetch("https://graph.microsoft.com/v1.0/me", {
+//           headers: {
+//             "Authorization": "Bearer " + token,
+//             "Content-Type": "application/json"
+//           }
+//         })
+//           .then((response) => {
+//             if (!response.ok) {
+//               reject(new Error("Failed to fetch user profile: " + response.statusText));
+//             }
+//             return response.json();
+//           })
+//           .then((data) => {
+//             const email = data.mail || data.userPrincipalName;
+//             if (email) {
+//               resolve(email);
+//             } else {
+//               reject(new Error("No email found in user profile."));
+//             }
+//           })
+//           .catch((error) => reject(error));
+//       } else {
+//         reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
+//       }
+//     });
+//   });
+// }
+
+function getUserEmail() {
   return new Promise((resolve, reject) => {
     Office.context.auth.getAccessTokenAsync((result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
         const token = result.value;
-            insertDebugMessage(`do we have the token ${token}`);
-
-        // Call Microsoft Graph to get the user's profile.
+        // Now call Graph
         fetch("https://graph.microsoft.com/v1.0/me", {
           headers: {
-            "Authorization": "Bearer " + token,
-            "Content-Type": "application/json"
-          }
+            Authorization: "Bearer " + token,
+          },
         })
-          .then((response) => {
-            if (!response.ok) {
-              reject(new Error("Failed to fetch user profile: " + response.statusText));
+          .then((resp) => {
+            if (!resp.ok) {
+              return resp.text().then((text) => {
+                reject(new Error("Failed to fetch user: " + resp.status + " " + text));
+              });
             }
-            return response.json();
+            return resp.json();
           })
           .then((data) => {
             const email = data.mail || data.userPrincipalName;
             if (email) {
               resolve(email);
             } else {
-              reject(new Error("No email found in user profile."));
+              reject(new Error("No email in profile."));
             }
           })
-          .catch((error) => reject(error));
+          .catch((err) => reject(err));
       } else {
         reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
       }
     });
   });
 }
+
 
 // List of admin emails. Adjust these values as needed.
 function isAdmin(email) {
