@@ -287,13 +287,7 @@ function toggleAdminForm(isAdminUser) {
 }
 
 // Debug helper: log messages both to console and (if exists) a debug div.
-function insertDebugMessage(message) {
-  console.log(message);
-  const debugElement = document.getElementById("debugMessages");
-  if (debugElement) {
-    debugElement.innerHTML += `<p>${message}</p>`;
-  }
-}
+
 // Main function: Called when Office.js is ready
 
 // List of admin emails (replace with your actual admin emails or fetch from a database)
