@@ -235,6 +235,8 @@ function getUserEmail() {
     Office.context.auth.getAccessTokenAsync((result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
         const token = result.value;
+            insertDebugMessage(`do we have the token ${token}`);
+
         // Call Microsoft Graph to get the user's profile.
         fetch("https://graph.microsoft.com/v1.0/me", {
           headers: {
