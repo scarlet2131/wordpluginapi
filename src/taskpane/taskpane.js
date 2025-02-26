@@ -251,10 +251,13 @@ async function initializeAuth() {
 }
 
 async function getTokenSilently() {
+              insertDebugMessage(`entered`)
+
   try {
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length === 0) return null;
-    
+          insertDebugMessage(`are u here 22  ", ${accounts}`)
+
     const response = await msalInstance.acquireTokenSilent({
       account: accounts[0],
       scopes: ["User.Read"]
