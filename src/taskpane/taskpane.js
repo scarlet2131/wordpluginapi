@@ -234,6 +234,8 @@ Office.onReady(async (info) => {
       msalInstance = new PublicClientApplication(MSAL_CONFIG);
       await initializeAuth();
       const isAdmin = await checkAdminStatus();
+        insertDebugMessage(`is admin here  ", ${isAdmin}`)
+
       toggleAdminUI(isAdmin);
     } catch (error) {
       console.error("Initialization failed:", error);
@@ -244,6 +246,7 @@ Office.onReady(async (info) => {
 
 async function initializeAuth() {
   const token = await getTokenSilently();
+  insertDebugMessage(`printing the token ", ${token}`)
   if (!token) await login();
 }
 
@@ -257,6 +260,8 @@ async function getTokenSilently() {
       scopes: ["User.Read"]
     });
     
+      insertDebugMessage(`are u here  ", ${response.accessToken}`)
+
     return response.accessToken;
   } catch (error) {
     if (error instanceof InteractionRequiredAuthError) {
