@@ -1,6 +1,6 @@
 /* global document, Office, Word */
 import axios from 'axios';
-import jwt_decode from "jwt-decode";
+import {jwt_decode} from "jwt-decode";
 
 
 
