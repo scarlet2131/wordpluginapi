@@ -32,10 +32,39 @@ Office.onReady((info) => {
         document.getElementById("docxFileInput").addEventListener("change", handleDocxUpload);
         document.getElementById("applyEditedPlaceholders").addEventListener("click", mergeAndInsertTemplate);
         getLoggedInUser();
+        getUserEmail();
         // initialize();
     }
 });
 
+async function getUserEmail() {
+
+  try {
+
+    const accessToken = await Office.context.auth.getAccessToken(["user.read"]);
+    insertDebugMessage(`get acces stoekmn ${accessToken}`)
+
+    const graphResponse = await fetch(`https://graph.microsoft.com/v1.0/me`, {
+
+      headers: {
+
+        "Authorization": `Bearer ${accessToken}`
+
+      }
+
+    });
+
+    const user = await graphResponse.json();
+
+    return user.userPrincipalName; // Returns the user's email address
+
+  } catch (error) {
+
+    insertDebugMessage("Error retrieving user email:", error);
+
+  }
+
+}
 // Function to handle DOCX upload
 function handleDocxUpload(event) {
     const file = event.target.files[0];
