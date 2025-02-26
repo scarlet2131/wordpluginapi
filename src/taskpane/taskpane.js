@@ -206,21 +206,78 @@ async function extractPlaceholdersFromDocument(context) {
 
 
 // Main initialization: get user email and toggle admin UI.
-async function initializeTaskPane() {
-  try {
-    const userEmail = await getUserEmail();
-    insertDebugMessage("Logged-in user email: " + userEmail);
-    console.log("Logged-in user email:", userEmail);
+// async function initializeTaskPane() {
+//   try {
+//     const userEmail = await getUserEmail();
+//     insertDebugMessage("Logged-in user email: " + userEmail);
+//     console.log("Logged-in user email:", userEmail);
 
-    const isAdminUser = isAdmin(userEmail);
-    insertDebugMessage("Is admin: " + isAdminUser);
-    toggleAdminForm(isAdminUser);
-  } catch (error) {
-    console.error("Error initializing task pane:", error);
-    insertDebugMessage(`Error initializing task pane: " + ${error.message}`);
-  }
+//     const isAdminUser = isAdmin(userEmail);
+//     insertDebugMessage("Is admin: " + isAdminUser);
+//     toggleAdminForm(isAdminUser);
+//   } catch (error) {
+//     console.error("Error initializing task pane:", error);
+//     insertDebugMessage(`Error initializing task pane: " + ${error.message}`);
+//   }
+// }
+
+const msalConfig = {
+    auth: {
+        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+        redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
+    }
+};
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+async function getToken() {
+    const request = { scopes: ["User.Read"] };
+    try {
+        const response = await msalInstance.acquireTokenSilent(request);
+        return response.accessToken;
+    } catch (error) {
+        if (error instanceof InteractionRequiredAuthError) {
+            return await msalInstance.acquireTokenPopup(request);
+        }
+        throw error;
+    }
 }
 
+// async function checkAdminStatus() {
+//     try {
+//         const token = await getToken();
+//         const response = await axios.get('/api/check-admin', {
+//             headers: { Authorization: `Bearer ${token}` }
+//         });
+        
+//         return response.data.isAdmin;
+//     } catch (error) {
+//         console.error('Admin check failed:', error);
+//         return false;
+//     }
+// }
+
+async function initializeTaskPane() {
+    try {
+        const isAdmin = await isAdmin();
+        toggleAdminForm(isAdmin);
+    } catch (error) {
+        console.error('Initialization failed:', error);
+    }
+}
+
+function toggleAdminForm(isAdmin) {
+    document.getElementById('adminPage').style.display = isAdmin ? 'block' : 'none';
+    document.getElementById('loginButton').style.display = isAdmin ? 'none' : 'block';
+}
+
+// Initialize when Office is ready
+Office.onReady(() => {
+    if (Office.context.host === Office.HostType.Word) {
+        initializeTaskPane();
+    }
+});
 
 // Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
 // function getUserEmail() {
@@ -261,40 +318,40 @@ async function initializeTaskPane() {
 //   });
 // }
 
-function getUserEmail() {
-  return new Promise((resolve, reject) => {
-    Office.context.auth.getAccessTokenAsync((result) => {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        const token = result.value;
-        // Now call Graph
-        fetch("https://graph.microsoft.com/v1.0/me", {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        })
-          .then((resp) => {
-            if (!resp.ok) {
-              return resp.text().then((text) => {
-                reject(new Error("Failed to fetch user: " + resp.status + " " + text));
-              });
-            }
-            return resp.json();
-          })
-          .then((data) => {
-            const email = data.mail || data.userPrincipalName;
-            if (email) {
-              resolve(email);
-            } else {
-              reject(new Error("No email in profile."));
-            }
-          })
-          .catch((err) => reject(err));
-      } else {
-        reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
-      }
-    });
-  });
-}
+// function getUserEmail() {
+//   return new Promise((resolve, reject) => {
+//     Office.context.auth.getAccessTokenAsync((result) => {
+//       if (result.status === Office.AsyncResultStatus.Succeeded) {
+//         const token = result.value;
+//         // Now call Graph
+//         fetch("https://graph.microsoft.com/v1.0/me", {
+//           headers: {
+//             Authorization: "Bearer " + token,
+//           },
+//         })
+//           .then((resp) => {
+//             if (!resp.ok) {
+//               return resp.text().then((text) => {
+//                 reject(new Error("Failed to fetch user: " + resp.status + " " + text));
+//               });
+//             }
+//             return resp.json();
+//           })
+//           .then((data) => {
+//             const email = data.mail || data.userPrincipalName;
+//             if (email) {
+//               resolve(email);
+//             } else {
+//               reject(new Error("No email in profile."));
+//             }
+//           })
+//           .catch((err) => reject(err));
+//       } else {
+//         reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
+//       }
+//     });
+//   });
+// }
 
 
 // List of admin emails. Adjust these values as needed.
