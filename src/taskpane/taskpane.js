@@ -31,7 +31,7 @@ Office.onReady((info) => {
         // Attach event listeners
         document.getElementById("docxFileInput").addEventListener("change", handleDocxUpload);
         document.getElementById("applyEditedPlaceholders").addEventListener("click", mergeAndInsertTemplate);
-        initialize();
+        // initialize();
     }
 });
 
