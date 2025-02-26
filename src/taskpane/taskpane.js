@@ -365,18 +365,18 @@ function isAdmin(email) {
 }
 
 // Toggle visibility of the admin settings form based on admin status.
-function toggleAdminForm(isAdminUser) {
-  const adminPage = document.getElementById("adminPage");
-  const loginButton = document.getElementById("loginButton");
+// function toggleAdminForm(isAdminUser) {
+//   const adminPage = document.getElementById("adminPage");
+//   const loginButton = document.getElementById("loginButton");
 
-  if (isAdminUser) {
-    adminPage.style.display = "block"; // Show admin settings.
-    loginButton.style.display = "none"; // Hide login button.
-  } else {
-    adminPage.style.display = "none";  // Hide admin settings.
-    loginButton.style.display = "block"; // Show login button.
-  }
-}
+//   if (isAdminUser) {
+//     adminPage.style.display = "block"; // Show admin settings.
+//     loginButton.style.display = "none"; // Hide login button.
+//   } else {
+//     adminPage.style.display = "none";  // Hide admin settings.
+//     loginButton.style.display = "block"; // Show login button.
+//   }
+// }
 
 // Debug helper: log messages both to console and (if exists) a debug div.
 
