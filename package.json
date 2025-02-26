@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@azure/msal-browser": "^4.5.0",
+    "@microsoft/office-js": "^1.1.107",
     "axios": "^1.7.9",
     "core-js": "^3.36.0",
     "crypto-browserify": "^3.12.1",
