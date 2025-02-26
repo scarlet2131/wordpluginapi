@@ -205,10 +205,13 @@ async function extractPlaceholdersFromDocument(context) {
 
  const msalConfig = {
             auth: {
-                clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-                authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-                redirectUri: window.location.origin
-            }
+        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+        redirectUri: window.location.origin // Must match Azure AD registration
+    },
+    cache: {
+        cacheLocation: "sessionStorage"
+    }
         };
 
         const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -406,7 +409,7 @@ async function extractPlaceholdersFromDocument(context) {
     try {
       insertDebugMessage("Loading admin settings...");
       // Note: Office.context.roamingSettings.get returns the value directly (it’s not a promise)
-      const settings = Office.context.roamingSettings.get("adminConfig") || {};
+        const settings = await Office.context.roamingSettings.get("adminConfig"); 
       document.getElementById("oneDriveLink").value = settings.oneDriveLink || "";
       document.getElementById("apiKey").value = settings.apiKey || "";
       insertDebugMessage("Admin settings loaded: " + JSON.stringify(settings));
