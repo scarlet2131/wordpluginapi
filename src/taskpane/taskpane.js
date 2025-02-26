@@ -203,57 +203,62 @@ async function extractPlaceholdersFromDocument(context) {
 
 // --------------------- now we are working on the login functionality ---------------------------
 
-// AdminManager.js
-class AdminManager {
-  constructor() {
-    this.msalConfig = {
-      auth: {
-        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-        redirectUri: window.location.origin
-      }
-    };
-    this.msalInstance = new PublicClientApplication(this.msalConfig);
-  }
-
-  async initialize() {
+async function getLoggedInUser() {
     try {
-      const token = await this.getToken();
-      const isAdmin = await this.checkAdminStatus(token);
-      this.toggleAdminUI(isAdmin);
+        insertDebugMessage("Starting Office auth process...");
+        
+        const tokenResult = await new Promise((resolve, reject) => {
+            Office.context.auth.getUserIdentityTokenAsync((result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    insertDebugMessage("Office auth token received");
+                    resolve(result.value);
+                } else {
+                    insertDebugMessage(`Office auth failed: ${result.error.message}`);
+                    reject(new Error(result.error.message));
+                }
+            });
+        });
+
+        insertDebugMessage(`Raw Office token: ${tokenResult.substring(0, 50)}...`);
+        
+        const response = await axios.post('/api/get-user', {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${tokenResult}`
+            }
+        });
+
+        insertDebugMessage("Backend response received:");
+        insertDebugMessage(JSON.stringify(response.data, null, 2));
+        
+        console.log("Full user data:", response.data);
+        return response.data;
+        
     } catch (error) {
-      console.error("Admin init failed:", error);
+        insertDebugMessage(`Error in getLoggedInUser: ${error.message}`);
+        console.error("Full error:", error);
+        if (error.response) {
+            insertDebugMessage(`Backend error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+        }
+        throw error;
     }
-  }
-
-  async getToken() {
-    // Same pattern as your teammate's code
-    try {
-      return await this.msalInstance.acquireTokenSilent({
-        scopes: ["User.Read"]
-      });
-    } catch (silentError) {
-      return await this.msalInstance.acquireTokenPopup({
-        scopes: ["User.Read"]
-      });
-    }
-  }
-
-  async checkAdminStatus(tokenResponse) {
-    // Call backend endpoint that replicates teammate's logic
-    const response = await axios.get("https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin", {
-      headers: { Authorization: `Bearer ${tokenResponse.accessToken}` }
-    });
-    return response.data.isAdmin;
-  }
-
-  toggleAdminUI(isAdmin) {
-    // Your existing UI toggle logic
-  }
 }
 
-// Initialize when Office ready
-Office.onReady(() => new AdminManager());
+// Usage with error handling
+getLoggedInUser()
+    .then(user => {
+        insertDebugMessage("User info successfully retrieved:");
+        insertDebugMessage(`Name: ${user.displayName}`);
+        insertDebugMessage(`Email: ${user.mail}`);
+    })
+    .catch(error => {
+        insertDebugMessage("Failed to get user info:");
+        insertDebugMessage(error.message);
+    });
+
+// Helper function to display debug messages
+
+
 
 
 
