@@ -223,7 +223,7 @@ async function initializeTaskPane() {
     toggleAdminForm(isAdminUser);
   } catch (error) {
     console.error("Error initializing task pane:", error);
-    insertDebugMessage("Error initializing task pane: " + error.message);
+    insertDebugMessage(`Error initializing task pane: " + ${error.message}`);
   }
 }
 Office.initialize = function (reason) {
