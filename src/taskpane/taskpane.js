@@ -31,7 +31,7 @@ Office.onReady((info) => {
         // Attach event listeners
         document.getElementById("docxFileInput").addEventListener("change", handleDocxUpload);
         document.getElementById("applyEditedPlaceholders").addEventListener("click", mergeAndInsertTemplate);
-
+        initialize();
     }
 });
 
@@ -237,8 +237,8 @@ const msalConfig = {
             }
         }
 
-        // Start when Office ready
-        Office.onReady(() => initialize());
+        // // Start when Office ready
+        // Office.onReady(() => initialize());
 
 /* global document, Office, PublicClientApplication, InteractionRequiredAuthError */
 
@@ -281,30 +281,30 @@ const msalConfig = {
 //     insertDebugMessage("ClientAuthManager initialized with clientId: " + this.msalConfig.auth.clientId);
 //   }
 
-  async initialize() {
-    try {
-      insertDebugMessage("Initializing MSAL instance...");
-      const msalInstance = new PublicClientApplication(this.msalConfig);
-      const tokenResponse = await this.getToken(msalInstance);
-      insertDebugMessage("Token response received: " + JSON.stringify(tokenResponse));
+  // async initialize() {
+  //   try {
+  //     insertDebugMessage("Initializing MSAL instance...");
+  //     const msalInstance = new PublicClientApplication(this.msalConfig);
+  //     const tokenResponse = await this.getToken(msalInstance);
+  //     insertDebugMessage("Token response received: " + JSON.stringify(tokenResponse));
       
-      // Extract the access token from the token response (it should be a string)
-      const token = tokenResponse.accessToken;
-      if (!token) {
-        throw new Error("No access token in token response.");
-      }
-      insertDebugMessage("Access token: " + token);
+  //     // Extract the access token from the token response (it should be a string)
+  //     const token = tokenResponse.accessToken;
+  //     if (!token) {
+  //       throw new Error("No access token in token response.");
+  //     }
+  //     insertDebugMessage("Access token: " + token);
 
-      const email = await this.getUserEmail(token);
-      insertDebugMessage("User email fetched from Graph: " + email);
+  //     const email = await this.getUserEmail(token);
+  //     insertDebugMessage("User email fetched from Graph: " + email);
 
-      return this.isAdmin(email);
-    } catch (error) {
-      console.error("Auth initialization failed:", error);
-      insertDebugMessage("Auth initialization failed: " + error.message);
-      return false;
-    }
-  }
+  //     return this.isAdmin(email);
+  //   } catch (error) {
+  //     console.error("Auth initialization failed:", error);
+  //     insertDebugMessage("Auth initialization failed: " + error.message);
+  //     return false;
+  //   }
+  // }
 
   async getToken(msalInstance) {
     insertDebugMessage("Attempting to get token silently...");
