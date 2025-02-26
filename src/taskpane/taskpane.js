@@ -202,170 +202,63 @@ async function extractPlaceholdersFromDocument(context) {
 
 
 // --------------------- now we are working on the login functionality ---------------------------
-const msalConfig = {
-            auth: {
-                clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-                authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-                redirectUri: window.location.origin
-            }
-        };
 
-        const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-        // Main function
-        async function initialize() {
-            try {
-                // 1. Get token
-                const token = await msalInstance.acquireTokenSilent({
-                    scopes: ["User.Read"]
-                });
-
-                // 2. Call backend
-                const response = axios.get("https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin", {
-                    headers: { Authorization: `Bearer ${token.accessToken}` }
-                });
-                
-                const result = await response.json();
-
-                // 3. Toggle UI
-                if (result.isAdmin) {
-                    document.getElementById("adminContent").style.display = "block";
-                    document.getElementById("userContent").style.display = "none";
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        };
-
-        // // Start when Office ready
-        // Office.onReady(() => initialize());
-
-/* global document, Office, PublicClientApplication, InteractionRequiredAuthError */
-
-// clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-//         authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-//         redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
-
-/* global Office, document */
-
-// Debug helper function: logs message to console and to a debug div (if exists)
-// function insertDebugMessage(message) {
-//   console.log("[DEBUG]: " + message);
-//   const debugElement = document.getElementById("debugMessages");
-//   if (debugElement) {
-//     debugElement.innerHTML += `<p>[DEBUG]: ${message}</p>`;
-//   }
-// }
-
-// Client-side Admin Check Implementation using MSAL-Browser
-// class ClientAuthManager {
-//   constructor() {
-//     // Update these values with your actual Azure AD client and tenant info.
-//     this.msalConfig = {
-//       auth: {
-//         clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2", // Replace with your Azure AD client ID
-//         authority: `https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c`, // Replace with your tenant ID
-//         redirectUri: window.location.origin
-//       },
-//       cache: {
-//         cacheLocation: "sessionStorage" // Or "localStorage" if you prefer
-//       }
-//     };
-
-//     // Set of admin emails for your add-in.
-//     this.adminEmails = new Set([
-//       "c0914148@mylambton.ca",
-//       "monisha@kubetools.onmicrosoft.com"
-//     ]);
-    
-//     insertDebugMessage("ClientAuthManager initialized with clientId: " + this.msalConfig.auth.clientId);
-//   }
-
-  // async initialize() {
-  //   try {
-  //     insertDebugMessage("Initializing MSAL instance...");
-  //     const msalInstance = new PublicClientApplication(this.msalConfig);
-  //     const tokenResponse = await this.getToken(msalInstance);
-  //     insertDebugMessage("Token response received: " + JSON.stringify(tokenResponse));
-      
-  //     // Extract the access token from the token response (it should be a string)
-  //     const token = tokenResponse.accessToken;
-  //     if (!token) {
-  //       throw new Error("No access token in token response.");
-  //     }
-  //     insertDebugMessage("Access token: " + token);
-
-  //     const email = await this.getUserEmail(token);
-  //     insertDebugMessage("User email fetched from Graph: " + email);
-
-  //     return this.isAdmin(email);
-  //   } catch (error) {
-  //     console.error("Auth initialization failed:", error);
-  //     insertDebugMessage("Auth initialization failed: " + error.message);
-  //     return false;
-  //   }
-  // }
-
-  async getToken(msalInstance) {
-    insertDebugMessage("Attempting to get token silently...");
-    const accounts = msalInstance.getAllAccounts();
-    insertDebugMessage("Accounts available: " + JSON.stringify(accounts));
-    if (accounts.length > 0) {
-      try {
-        const response = await msalInstance.acquireTokenSilent({
-          account: accounts[0],
-          scopes: ["User.Read"]
-        });
-        insertDebugMessage("Token acquired silently.");
-        return response;
-      } catch (silentError) {
-        insertDebugMessage("Silent token acquisition failed: " + silentError.message);
+// AdminManager.js
+class AdminManager {
+  constructor() {
+    this.msalConfig = {
+      auth: {
+        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+        redirectUri: window.location.origin
       }
-    }
-    insertDebugMessage("Falling back to interactive token acquisition...");
-    // Use popup as fallback
-    const interactiveResponse = await msalInstance.acquireTokenPopup({
-      scopes: ["User.Read"],
-      prompt: "select_account"
-    });
-    insertDebugMessage("Token acquired via popup.");
-    return interactiveResponse;
+    };
+    this.msalInstance = new PublicClientApplication(this.msalConfig);
   }
 
-  async getUserEmail(token) {
-    insertDebugMessage("Calling Microsoft Graph /me endpoint with token...");
+  async initialize() {
     try {
-      const response = await fetch("https://graph.microsoft.com/v1.0/me", {
-        headers: {
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json"
-        }
-      });
-      insertDebugMessage("Graph response status: " + response.status);
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error("Graph call failed: " + response.status + " " + text);
-      }
-      const data = await response.json();
-      insertDebugMessage("Graph response data: " + JSON.stringify(data));
-      const email = data.mail || data.userPrincipalName;
-      if (!email) {
-        throw new Error("No email found in user profile.");
-      }
-      return email;
+      const token = await this.getToken();
+      const isAdmin = await this.checkAdminStatus(token);
+      this.toggleAdminUI(isAdmin);
     } catch (error) {
-      console.error("Error fetching user email from Graph:", error);
-      insertDebugMessage("Error fetching user email from Graph: " + error.message);
-      throw error;
+      console.error("Admin init failed:", error);
     }
   }
 
-  isAdmin(email) {
-    const isAdminUser = this.adminEmails.has(email.toLowerCase());
-    insertDebugMessage("Checking admin status for " + email + ": " + isAdminUser);
-    return isAdminUser;
+  async getToken() {
+    // Same pattern as your teammate's code
+    try {
+      return await this.msalInstance.acquireTokenSilent({
+        scopes: ["User.Read"]
+      });
+    } catch (silentError) {
+      return await this.msalInstance.acquireTokenPopup({
+        scopes: ["User.Read"]
+      });
+    }
+  }
+
+  async checkAdminStatus(tokenResponse) {
+    // Call backend endpoint that replicates teammate's logic
+    const response = await axios.get("https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin", {
+      headers: { Authorization: `Bearer ${tokenResponse.accessToken}` }
+    });
+    return response.data.isAdmin;
+  }
+
+  toggleAdminUI(isAdmin) {
+    // Your existing UI toggle logic
   }
 }
+
+// Initialize when Office ready
+Office.onReady(() => new AdminManager());
+
+
+
+
+
 
 // UI Controller for the Admin Page
 class AdminUIController {
