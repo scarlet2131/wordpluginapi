@@ -204,6 +204,126 @@ async function extractPlaceholdersFromDocument(context) {
 // --------------------- now we are working on the login functionality ---------------------------
 
 
+/* global document, Office, PublicClientApplication, InteractionRequiredAuthError */
+
+// clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+//         authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+//         redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
+
+const MSAL_CONFIG = {
+  auth: {
+    clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2", // Replace with your Azure AD app ID
+    authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c", // Replace with your tenant ID
+    redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net" // Your deployed Azure URL
+  }
+};
+
+// List of admin emails (only client-side option)
+const ADMIN_EMAILS = new Set([
+  "admin1@yourcompany.com",
+  "admin2@yourcompany.com",
+  "c0914148@mylambton.ca",
+  "monisha@kubetools.onmicrosoft.com"
+]);
+
+let msalInstance = null;
+
+Office.onReady(async (info) => {
+  if (info.host === Office.HostType.Word) {
+    try {
+      msalInstance = new PublicClientApplication(MSAL_CONFIG);
+      await initializeAuth();
+      const isAdmin = await checkAdminStatus();
+      toggleAdminUI(isAdmin);
+    } catch (error) {
+      console.error("Initialization failed:", error);
+      showError("Initialization failed. Please reload.");
+    }
+  }
+});
+
+async function initializeAuth() {
+  const token = await getTokenSilently();
+  if (!token) await login();
+}
+
+async function getTokenSilently() {
+  try {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 0) return null;
+    
+    const response = await msalInstance.acquireTokenSilent({
+      account: accounts[0],
+      scopes: ["User.Read"]
+    });
+    
+    return response.accessToken;
+  } catch (error) {
+    if (error instanceof InteractionRequiredAuthError) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function login() {
+  try {
+    await msalInstance.loginPopup({
+      scopes: ["User.Read"],
+      prompt: "select_account"
+    });
+  } catch (error) {
+    console.error("Login failed:", error);
+    throw new Error("User login cancelled");
+  }
+}
+
+async function checkAdminStatus() {
+  try {
+    const token = await getTokenSilently();
+    if (!token) return false;
+
+    const response = await fetch("https://graph.microsoft.com/v1.0/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error("Graph API call failed");
+    
+    const data = await response.json();
+    const userEmail = data.mail || data.userPrincipalName;
+    
+    return ADMIN_EMAILS.has(userEmail.toLowerCase());
+  } catch (error) {
+    console.error("Admin check failed:", error);
+    return false;
+  }
+}
+
+function toggleAdminUI(isAdmin) {
+  document.getElementById("adminPage").style.display = isAdmin ? "block" : "none";
+  document.getElementById("loginButton").style.display = isAdmin ? "none" : "block";
+  
+  if (isAdmin) {
+    document.getElementById("adminEmail").textContent = `Logged in as admin: ${getUserEmail()}`;
+  }
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById("errorMessage");
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+}
+
+// Login button handler
+document.getElementById("loginButton").addEventListener("click", async () => {
+  try {
+    await login();
+    const isAdmin = await checkAdminStatus();
+    toggleAdminUI(isAdmin);
+  } catch (error) {
+    showError("Login failed. Please try again.");
+  }
+});
 
 // Main initialization: get user email and toggle admin UI.
 // async function initializeTaskPane() {
@@ -221,28 +341,28 @@ async function extractPlaceholdersFromDocument(context) {
 //   }
 // }
 
-const msalConfig = {
-    auth: {
-        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-        redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
-    }
-};
+// const msalConfig = {
+//     auth: {
+//         clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+//         authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+//         redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
+//     }
+// };
 
-const msalInstance = new PublicClientApplication(msalConfig);
+// const msalInstance = new PublicClientApplication(msalConfig);
 
-async function getToken() {
-    const request = { scopes: ["User.Read"] };
-    try {
-        const response = await msalInstance.acquireTokenSilent(request);
-        return response.accessToken;
-    } catch (error) {
-        if (error instanceof InteractionRequiredAuthError) {
-            return await msalInstance.acquireTokenPopup(request);
-        }
-        throw error;
-    }
-}
+// async function getToken() {
+//     const request = { scopes: ["User.Read"] };
+//     try {
+//         const response = await msalInstance.acquireTokenSilent(request);
+//         return response.accessToken;
+//     } catch (error) {
+//         if (error instanceof InteractionRequiredAuthError) {
+//             return await msalInstance.acquireTokenPopup(request);
+//         }
+//         throw error;
+//     }
+// }
 
 // async function checkAdminStatus() {
 //     try {
@@ -258,26 +378,26 @@ async function getToken() {
 //     }
 // }
 
-async function initializeTaskPane() {
-    try {
-        const isAdmin = await isAdmin();
-        toggleAdminForm(isAdmin);
-    } catch (error) {
-        console.error('Initialization failed:', error);
-    }
-}
+// async function initializeTaskPane() {
+//     try {
+//         const isAdmin = await isAdmin();
+//         toggleAdminForm(isAdmin);
+//     } catch (error) {
+//         console.error('Initialization failed:', error);
+//     }
+// }
 
-function toggleAdminForm(isAdmin) {
-    document.getElementById('adminPage').style.display = isAdmin ? 'block' : 'none';
-    document.getElementById('loginButton').style.display = isAdmin ? 'none' : 'block';
-}
+// function toggleAdminForm(isAdmin) {
+//     document.getElementById('adminPage').style.display = isAdmin ? 'block' : 'none';
+//     document.getElementById('loginButton').style.display = isAdmin ? 'none' : 'block';
+// }
 
-// Initialize when Office is ready
-Office.onReady(() => {
-    if (Office.context.host === Office.HostType.Word) {
-        initializeTaskPane();
-    }
-});
+// // Initialize when Office is ready
+// Office.onReady(() => {
+//     if (Office.context.host === Office.HostType.Word) {
+//         initializeTaskPane();
+//     }
+// });
 
 // Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
 // function getUserEmail() {
@@ -354,17 +474,17 @@ Office.onReady(() => {
 // }
 
 
-// List of admin emails. Adjust these values as needed.
-function isAdmin(email) {
-  const adminEmails = [
-    "c0914148@mylambton.ca",
-    "admin2@example.com",
-    "monisha@kubetools.onmicrosoft.com"
-  ];
-  return adminEmails.includes(email.toLowerCase());
-}
+// // List of admin emails. Adjust these values as needed.
+// function isAdmin(email) {
+//   const adminEmails = [
+//     "c0914148@mylambton.ca",
+//     "admin2@example.com",
+//     "monisha@kubetools.onmicrosoft.com"
+//   ];
+//   return adminEmails.includes(email.toLowerCase());
+// }
 
-// Toggle visibility of the admin settings form based on admin status.
+// // Toggle visibility of the admin settings form based on admin status.
 // function toggleAdminForm(isAdminUser) {
 //   const adminPage = document.getElementById("adminPage");
 //   const loginButton = document.getElementById("loginButton");
