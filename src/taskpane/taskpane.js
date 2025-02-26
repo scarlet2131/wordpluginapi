@@ -202,16 +202,12 @@ async function extractPlaceholdersFromDocument(context) {
 
 
 // --------------------- now we are working on the login functionality ---------------------------
-
- const msalConfig = {
+const msalConfig = {
             auth: {
-        clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-        authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-        redirectUri: window.location.origin // Must match Azure AD registration
-    },
-    cache: {
-        cacheLocation: "sessionStorage"
-    }
+                clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
+                authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
+                redirectUri: window.location.origin
+            }
         };
 
         const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -225,10 +221,8 @@ async function extractPlaceholdersFromDocument(context) {
                 });
 
                 // 2. Call backend
-                const response = await axio.get("https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin", {
-                    headers: { 
-                        "Authorization" : `Bearer ${token.accessToken}` 
-                    }
+                const response = axios.get("https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin", {
+                    headers: { Authorization: `Bearer ${token.accessToken}` }
                 });
                 
                 const result = await response.json();
@@ -245,8 +239,6 @@ async function extractPlaceholdersFromDocument(context) {
 
         // Start when Office ready
         Office.onReady(() => initialize());
-
-
 
 /* global document, Office, PublicClientApplication, InteractionRequiredAuthError */
 
@@ -289,127 +281,127 @@ async function extractPlaceholdersFromDocument(context) {
 //     insertDebugMessage("ClientAuthManager initialized with clientId: " + this.msalConfig.auth.clientId);
 //   }
 
-  // async initialize() {
-  //   try {
-  //     insertDebugMessage("Initializing MSAL instance...");
-  //     const msalInstance = new PublicClientApplication(this.msalConfig);
-  //     const tokenResponse = await this.getToken(msalInstance);
-  //     insertDebugMessage("Token response received: " + JSON.stringify(tokenResponse));
+  async initialize() {
+    try {
+      insertDebugMessage("Initializing MSAL instance...");
+      const msalInstance = new PublicClientApplication(this.msalConfig);
+      const tokenResponse = await this.getToken(msalInstance);
+      insertDebugMessage("Token response received: " + JSON.stringify(tokenResponse));
       
-  //     // Extract the access token from the token response (it should be a string)
-  //     const token = tokenResponse.accessToken;
-  //     if (!token) {
-  //       throw new Error("No access token in token response.");
-  //     }
-  //     insertDebugMessage("Access token: " + token);
+      // Extract the access token from the token response (it should be a string)
+      const token = tokenResponse.accessToken;
+      if (!token) {
+        throw new Error("No access token in token response.");
+      }
+      insertDebugMessage("Access token: " + token);
 
-  //     const email = await this.getUserEmail(token);
-  //     insertDebugMessage("User email fetched from Graph: " + email);
+      const email = await this.getUserEmail(token);
+      insertDebugMessage("User email fetched from Graph: " + email);
 
-  //     return this.isAdmin(email);
-  //   } catch (error) {
-  //     console.error("Auth initialization failed:", error);
-  //     insertDebugMessage("Auth initialization failed: " + error.message);
-  //     return false;
-  //   }
-  // }
+      return this.isAdmin(email);
+    } catch (error) {
+      console.error("Auth initialization failed:", error);
+      insertDebugMessage("Auth initialization failed: " + error.message);
+      return false;
+    }
+  }
 
-  // async getToken(msalInstance) {
-  //   insertDebugMessage("Attempting to get token silently...");
-  //   const accounts = msalInstance.getAllAccounts();
-  //   insertDebugMessage("Accounts available: " + JSON.stringify(accounts));
-  //   if (accounts.length > 0) {
-  //     try {
-  //       const response = await msalInstance.acquireTokenSilent({
-  //         account: accounts[0],
-  //         scopes: ["User.Read"]
-  //       });
-  //       insertDebugMessage("Token acquired silently.");
-  //       return response;
-  //     } catch (silentError) {
-  //       insertDebugMessage("Silent token acquisition failed: " + silentError.message);
-  //     }
-  //   }
-  //   insertDebugMessage("Falling back to interactive token acquisition...");
-  //   // Use popup as fallback
-  //   const interactiveResponse = await msalInstance.acquireTokenPopup({
-  //     scopes: ["User.Read"],
-  //     prompt: "select_account"
-  //   });
-  //   insertDebugMessage("Token acquired via popup.");
-  //   return interactiveResponse;
-  // }
+  async getToken(msalInstance) {
+    insertDebugMessage("Attempting to get token silently...");
+    const accounts = msalInstance.getAllAccounts();
+    insertDebugMessage("Accounts available: " + JSON.stringify(accounts));
+    if (accounts.length > 0) {
+      try {
+        const response = await msalInstance.acquireTokenSilent({
+          account: accounts[0],
+          scopes: ["User.Read"]
+        });
+        insertDebugMessage("Token acquired silently.");
+        return response;
+      } catch (silentError) {
+        insertDebugMessage("Silent token acquisition failed: " + silentError.message);
+      }
+    }
+    insertDebugMessage("Falling back to interactive token acquisition...");
+    // Use popup as fallback
+    const interactiveResponse = await msalInstance.acquireTokenPopup({
+      scopes: ["User.Read"],
+      prompt: "select_account"
+    });
+    insertDebugMessage("Token acquired via popup.");
+    return interactiveResponse;
+  }
 
-  // async getUserEmail(token) {
-  //   insertDebugMessage("Calling Microsoft Graph /me endpoint with token...");
-    // try {
-    //   const response = await fetch("https://graph.microsoft.com/v1.0/me", {
-    //     headers: {
-    //       "Authorization": "Bearer " + token,
-    //       "Content-Type": "application/json"
-    //     }
-    //   });
-    //   insertDebugMessage("Graph response status: " + response.status);
-    //   if (!response.ok) {
-    //     const text = await response.text();
-    //     throw new Error("Graph call failed: " + response.status + " " + text);
-    //   }
-    //   const data = await response.json();
-    //   insertDebugMessage("Graph response data: " + JSON.stringify(data));
-    //   const email = data.mail || data.userPrincipalName;
-    //   if (!email) {
-    //     throw new Error("No email found in user profile.");
-    //   }
-    //   return email;
-    // } catch (error) {
-//       console.error("Error fetching user email from Graph:", error);
-//       insertDebugMessage("Error fetching user email from Graph: " + error.message);
-//       throw error;
-//     }
-//   }
+  async getUserEmail(token) {
+    insertDebugMessage("Calling Microsoft Graph /me endpoint with token...");
+    try {
+      const response = await fetch("https://graph.microsoft.com/v1.0/me", {
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        }
+      });
+      insertDebugMessage("Graph response status: " + response.status);
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error("Graph call failed: " + response.status + " " + text);
+      }
+      const data = await response.json();
+      insertDebugMessage("Graph response data: " + JSON.stringify(data));
+      const email = data.mail || data.userPrincipalName;
+      if (!email) {
+        throw new Error("No email found in user profile.");
+      }
+      return email;
+    } catch (error) {
+      console.error("Error fetching user email from Graph:", error);
+      insertDebugMessage("Error fetching user email from Graph: " + error.message);
+      throw error;
+    }
+  }
 
-//   isAdmin(email) {
-//     const isAdminUser = this.adminEmails.has(email.toLowerCase());
-//     insertDebugMessage("Checking admin status for " + email + ": " + isAdminUser);
-//     return isAdminUser;
-//   }
-// }
+  isAdmin(email) {
+    const isAdminUser = this.adminEmails.has(email.toLowerCase());
+    insertDebugMessage("Checking admin status for " + email + ": " + isAdminUser);
+    return isAdminUser;
+  }
+}
 
-// // UI Controller for the Admin Page
-// class AdminUIController {
-//   constructor() {
-//     this.authManager = new ClientAuthManager();
-//     this.initializeUI();
-//   }
+// UI Controller for the Admin Page
+class AdminUIController {
+  constructor() {
+    this.authManager = new ClientAuthManager();
+    this.initializeUI();
+  }
 
-//   async initializeUI() {
-//     try {
-//       insertDebugMessage("Initializing Admin UI...");
-//       const isAdmin = await this.authManager.initialize();
-//       insertDebugMessage("Admin status determined: " + isAdmin);
-//       this.toggleAdminUI(isAdmin);
+  async initializeUI() {
+    try {
+      insertDebugMessage("Initializing Admin UI...");
+      const isAdmin = await this.authManager.initialize();
+      insertDebugMessage("Admin status determined: " + isAdmin);
+      this.toggleAdminUI(isAdmin);
       
-//       if (isAdmin) {
-//         this.loadAdminSettings();
-  //       document.getElementById("saveAdminSettings").addEventListener("click", this.saveSettings.bind(this));
-  //     }
-  //   } catch (error) {
-  //     console.error("Initialization failed:", error);
-  //     this.showError("Initialization failed. Please refresh.");
-  //   }
-  // }
+      if (isAdmin) {
+        this.loadAdminSettings();
+        document.getElementById("saveAdminSettings").addEventListener("click", this.saveSettings.bind(this));
+      }
+    } catch (error) {
+      console.error("Initialization failed:", error);
+      this.showError("Initialization failed. Please refresh.");
+    }
+  }
 
-  // toggleAdminUI(isAdmin) {
-  //   insertDebugMessage("Toggling admin UI. isAdmin: " + isAdmin);
-  //   document.getElementById("adminPage").style.display = isAdmin ? "block" : "none";
-  //   document.getElementById("loginButton").style.display = isAdmin ? "none" : "block";
-  // }
+  toggleAdminUI(isAdmin) {
+    insertDebugMessage("Toggling admin UI. isAdmin: " + isAdmin);
+    document.getElementById("adminPage").style.display = isAdmin ? "block" : "none";
+    document.getElementById("loginButton").style.display = isAdmin ? "none" : "block";
+  }
 
   async loadAdminSettings() {
     try {
       insertDebugMessage("Loading admin settings...");
       // Note: Office.context.roamingSettings.get returns the value directly (it’s not a promise)
-        const settings = await Office.context.roamingSettings.get("adminConfig"); 
+      const settings = Office.context.roamingSettings.get("adminConfig") || {};
       document.getElementById("oneDriveLink").value = settings.oneDriveLink || "";
       document.getElementById("apiKey").value = settings.apiKey || "";
       insertDebugMessage("Admin settings loaded: " + JSON.stringify(settings));
