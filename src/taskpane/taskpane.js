@@ -229,6 +229,8 @@ async function initializeTaskPane() {
 
 // Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
 function getUserEmail() {
+        insertDebugMessage("inside get userPrompt: " );
+
   return new Promise((resolve, reject) => {
     Office.context.auth.getAccessTokenAsync((result) => {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
