@@ -5,7 +5,6 @@ import jwtDecode from "jwt-decode";
 
 
 
-
 let currentPlaceholders = {};
 
 // Event listeners for buttons in the task pane
