@@ -235,7 +235,7 @@ const msalConfig = {
             } catch (error) {
                 console.error("Error:", error);
             }
-        }
+        };
 
         // // Start when Office ready
         // Office.onReady(() => initialize());
