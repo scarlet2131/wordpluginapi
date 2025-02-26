@@ -20,7 +20,7 @@ document.getElementById("acceptAllChanges").addEventListener("click", acceptAllT
 document.getElementById("rejectAllChanges").addEventListener("click", rejectAllTrackedChanges);
 document.getElementById("templatesBtn").addEventListener("click", getTemplatesAndPopulateDropdown);
 document.getElementById("openTemplateBtn").addEventListener("click", fetchAndOpenTemplate);
-document.getElementById("loginButton").addEventListener("click", initializeTaskPane);
+// document.getElementById("loginButton").addEventListener("click", initializeTaskPane);
 
 
 // // document.getElementById("saveAdminSettings").addEventListener("click", saveAdminSettings);
