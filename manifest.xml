@@ -90,7 +90,7 @@
     <!-- SSO Configuration -->
     <WebApplicationInfo>
       <Id>2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Id>
-      <Resource>api://wonderful-mud-072c2710f.6.azurestaticapps.net/2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource>
+      <Resource>api://2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource>
       <Scopes>
         <Scope>User.Read</Scope>
         <Scope>email</Scope>
