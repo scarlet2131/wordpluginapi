@@ -43,7 +43,7 @@ Office.onReady((info) => {
 
 
 Office.onReady((info) => {
-    if (info.host === Office.HostType.Excel) {
+    if (info.host === Office.HostType.Word) {
       document.getElementById("getIDToken").onclick = getIDToken;
     }
   });
@@ -54,6 +54,7 @@ Office.onReady((info) => {
         allowSignInPrompt: true,
       });
       let userToken = jwtDecode(userTokenEncoded);
+      insertDebugMessage(`printing the user token ${userToken}`)
       document.getElementById("userInfo").innerHTML =
         "name: " +
         userToken.name +
