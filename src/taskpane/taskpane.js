@@ -226,7 +226,11 @@ async function initializeTaskPane() {
     insertDebugMessage("Error initializing task pane: " + error.message);
   }
 }
-
+Office.initialize = function (reason) {
+    $(function () { 
+        insertDebugMessage("prii em al   ", Office.context.mailbox.userProfile.emailAddress);
+    }
+}
 // Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
 function getUserEmail() {
         insertDebugMessage("inside get userPrompt: " );
