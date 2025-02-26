@@ -4,7 +4,7 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
   <Id>62709012-a14e-4da7-a40a-f538e50d0a4b</Id>
-  <Version>1.0.0.7</Version>
+  <Version>1.0.0.8</Version>
   <ProviderName>Contoso</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="wordAdd-In" />
@@ -91,8 +91,8 @@
     <WebApplicationInfo>
       <Id>2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Id>
       <!-- <Resource>api://2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource> -->
-      <!-- <Resource>api://wonderful-mud-072c2710f.6.azurestaticapps.net/2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource> -->
-      <Resource>https://graph.microsoft.com</Resource>
+      <Resource>api://wonderful-mud-072c2710f.6.azurestaticapps.net/2ac7289e-19ec-4832-bfff-16c6a8b4e8b2</Resource>
+      <!-- <Resource>https://graph.microsoft.com</Resource> -->
       <Scopes>
         <Scope>User.Read</Scope>
         <Scope>email</Scope>
