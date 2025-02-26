@@ -41,7 +41,7 @@ Office.onReady((info) => {
 
 
 Office.onReady((info) => {
-    if (info.host === Office.HostType.Excel) {
+    if (info.host === Office.HostType.Word) {
       document.getElementById("getIDToken").onclick = getIDToken;
     }
   });
