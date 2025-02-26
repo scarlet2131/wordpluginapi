@@ -1,6 +1,5 @@
 /* global document, Office, Word */
 import axios from 'axios';
-// import jwt_decode from "jwt-decode";
 import jwtDecode from "jwt-decode";
 
 
@@ -49,30 +48,29 @@ Office.onReady((info) => {
   
   async function getIDToken() {
     try {
-      let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
-        allowSignInPrompt: true,
-      });
-      let userToken = jwtDecode(userTokenEncoded);
-      insertDebugMessage(`printing the user token ${userToken}`)
-      document.getElementById("userInfo").innerHTML =
-        "name: " +
-        userToken.name +
-        "<br>email: " +
-        userToken.preferred_username +
-        "<br>id: " +
-        userToken.oid;
-      console.log(userToken);
+        const userTokenEncoded = await Office.auth.getAccessToken({
+            allowSignInPrompt: true,
+            forMSGraphAccess: true // Add this for Graph integration
+        });
+        
+        const userToken = jwtDecode(userTokenEncoded);
+        
+        insertDebugMessage(`User Token: ${JSON.stringify(userToken)}`);
+        
+        document.getElementById("userInfo").innerHTML = `
+            Name: ${userToken.name}<br>
+            Email: ${userToken.preferred_username}<br>
+            ID: ${userToken.oid}
+        `;
+        
     } catch (error) {
-      document.getElementById("userInfo").innerHTML =
-        "An error occurred. <br>Name: " +
-        error.name +
-        "<br>Code: " +
-        error.code +
-        "<br>Message: " +
-        error.message;
-      console.log(error);
+        document.getElementById("userInfo").innerHTML = `
+            Error: ${error.message}<br>
+            Code: ${error.code || 'N/A'}
+        `;
+        console.error("Auth Error:", error);
     }
-  }
+}
   
 
 async function getUserEmail() {
