@@ -74,12 +74,12 @@ Office.onReady((info) => {
        // 4. Toggle admin UI
        document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
        
-    //    // 5. If admin, load company config
-    //    if (isAdmin) {
-    //        const config = await getCompanyConfig(company);
-    //        document.getElementById('apiKey').value = config.openaiKey || '';
-    //        document.getElementById('onedriveLink').value = config.onedriveLink || '';
-    //    }
+       // 5. If admin, load company config
+       if (isAdmin) {
+           const config = await getCompanyConfig(company);
+           document.getElementById('apiKey').value = config.openaiKey || '';
+           document.getElementById('onedriveLink').value = config.onedriveLink || '';
+       }
     
     } catch (error) {
       document.getElementById("userInfo").innerHTML =
@@ -130,10 +130,23 @@ async function saveConfig() {
 }
 
 
+//  // Step 1: Fetch the .docx file from backend
+//  const response = await axios.get(`https://bca5-142-126-182-191.ngrok-free.app/api/templates/${selectedTemplateId}`, {
+//     headers: { "ngrok-skip-browser-warning": "true" },
+//     responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
+// });
+
 // Simplified backend calls
 async function checkAdminStatus(email) {
     try {
-        const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', { email });
+        const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', 
+        { email },
+        { headers:
+            { "ngrok-skip-browser-warning": "true",
+                "Content-Type": "application/json",
+            }
+        }
+    );
         insertDebugMessage(`Admin check result:', ${response}`);
 
         return response.data;
