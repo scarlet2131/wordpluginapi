@@ -62,6 +62,7 @@ Office.onReady((info) => {
         "<br>id: " +
         userToken.oid;
       insertDebugMessage(userToken);
+      insertDebugMessage(userToken.email)
 
        // 2. Extract company name from email
        const company = userToken.email.split('@')[1].split('.')[0];
