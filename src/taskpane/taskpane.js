@@ -64,10 +64,10 @@ Office.onReady((info) => {
       insertDebugMessage(userToken);
 
        // 2. Extract company name from email
-       const company = email.split('@')[1].split('.')[0];
+       const company = userToken.email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
-       const { isAdmin } = await checkAdminStatus(email);
+       const { isAdmin } = await checkAdminStatus(userToken.email);
        
        // 4. Toggle admin UI
        document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
