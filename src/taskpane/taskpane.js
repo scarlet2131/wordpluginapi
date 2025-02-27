@@ -139,7 +139,7 @@ async function saveConfig() {
 // Simplified backend calls
 async function checkAdminStatus(email) {
     try {
-        const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', 
+        const response = await axios.post('http://localhost:8000/api/check-admin', 
         { email },
         { headers:
             { "ngrok-skip-browser-warning": "true",
