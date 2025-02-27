@@ -61,7 +61,7 @@ Office.onReady((info) => {
         userToken.preferred_username +
         "<br>id: " +
         userToken.oid;
-      console.log(userToken);
+      insertDebugMessage(userToken);
 
     //    // 2. Extract company name from email
     //    const company = email.split('@')[1].split('.')[0];
@@ -78,7 +78,6 @@ Office.onReady((info) => {
     //        document.getElementById('apiKey').value = config.openaiKey || '';
     //        document.getElementById('onedriveLink').value = config.onedriveLink || '';
     //    }
-
     
     } catch (error) {
       document.getElementById("userInfo").innerHTML =
