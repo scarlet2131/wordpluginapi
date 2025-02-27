@@ -13,7 +13,7 @@ document.getElementById("applyEditedPlaceholders").addEventListener("click", upd
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
 document.getElementById("applyRedlines").addEventListener("click", applyRedlines);
 document.getElementById("generateAIChanges").addEventListener("click", generateAIChanges);
-document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
+// document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
 
 document.getElementById("disableAllChanges").addEventListener("click", disableAllChanges);
 document.getElementById("listTrackedChanges").addEventListener("click", listTrackedChanges);
@@ -1178,7 +1178,7 @@ async function sendDocumentJSONToAPI(instruction) {
             }
 
             // Log the JSON for debugging
-            console.log("[DEBUG] Document JSON extracted:", documentJSON);
+            insertDebugMessage("[DEBUG] Document JSON extracted:", documentJSON);
 
             // Step 2: Prepare the payload
             const payload = {
