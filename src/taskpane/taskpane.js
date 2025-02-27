@@ -13,7 +13,7 @@ document.getElementById("applyEditedPlaceholders").addEventListener("click", upd
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
 document.getElementById("applyRedlines").addEventListener("click", applyRedlines);
 document.getElementById("generateAIChanges").addEventListener("click", generateAIChanges);
-// document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
+document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
 
 document.getElementById("disableAllChanges").addEventListener("click", disableAllChanges);
 document.getElementById("listTrackedChanges").addEventListener("click", listTrackedChanges);
@@ -1295,7 +1295,7 @@ async function displayProposedChanges(changes) {
 
 
 
-document.getElementById("generateAIChangesWithContext").addEventListener("click", async () => {
+async function generateAIChangesWithContext() {
     const userPrompt = document.getElementById("aiPromptInput").value;
     if (!userPrompt) {
         console.error("No prompt provided.");
@@ -1308,7 +1308,7 @@ document.getElementById("generateAIChangesWithContext").addEventListener("click"
     // Call the function to send the document content and process it
     // await sendDocumentContentToAPI(userPrompt);
     await sendDocumentJSONToAPI(userPrompt);
-});
+}
 
 
 
