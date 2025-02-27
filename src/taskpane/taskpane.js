@@ -64,14 +64,14 @@ Office.onReady((info) => {
       insertDebugMessage(userToken);
       insertDebugMessage(userToken.email)
 
-       // 2. Extract company name from email
-       const company = userToken.email.split('@')[1].split('.')[0];
+    //    // 2. Extract company name from email
+    //    const company = userToken.email.split('@')[1].split('.')[0];
         
-       // 3. Check admin status with backend
-       const { isAdmin } = await checkAdminStatus(userToken.email);
+    //    // 3. Check admin status with backend
+    //    const { isAdmin } = await checkAdminStatus(userToken.email);
        
-       // 4. Toggle admin UI
-       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+    //    // 4. Toggle admin UI
+    //    document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
        
     //    // 5. If admin, load company config
     //    if (isAdmin) {
