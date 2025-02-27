@@ -13,7 +13,7 @@ document.getElementById("applyEditedPlaceholders").addEventListener("click", upd
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
 document.getElementById("applyRedlines").addEventListener("click", applyRedlines);
 document.getElementById("generateAIChanges").addEventListener("click", generateAIChanges);
-// document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
+document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
 
 document.getElementById("disableAllChanges").addEventListener("click", disableAllChanges);
 document.getElementById("listTrackedChanges").addEventListener("click", listTrackedChanges);
@@ -1302,7 +1302,7 @@ document.getElementById("generateAIChangesWithContext").addEventListener("click"
         // await insertDebugMessage("No prompt provided for AI generation.");
         return;
     }
-
+    insertDebugMessage("does it reach here first of all ")
     // await insertDebugMessage(`Button clicked. Starting AI generation with prompt: ${userPrompt}`);
 
     // Call the function to send the document content and process it
