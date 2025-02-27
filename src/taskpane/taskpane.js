@@ -34,20 +34,20 @@ Office.onReady((info) => {
         // Attach event listeners
         document.getElementById("docxFileInput").addEventListener("change", handleDocxUpload);
         document.getElementById("applyEditedPlaceholders").addEventListener("click", mergeAndInsertTemplate);
-        // getLoggedInUser();
-        getUserEmail();
-        // initialize();
+
     }
 });
 
 
 Office.onReady((info) => {
     if (info.host === Office.HostType.Word) {
-      document.getElementById("getIDToken").onclick = getIDToken;
+      // Attach main button click handler
+      document.getElementById("getIDToken").addEventListener("click", handleAdminFlow);
+      document.getElementById("saveAdminSettings").addEventListener("click", saveConfig);
     }
   });
   
-  async function getIDToken() {
+  async function handleAdminFlow() {
     try {
       let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
         allowSignInPrompt: true,
@@ -62,6 +62,24 @@ Office.onReady((info) => {
         "<br>id: " +
         userToken.oid;
       console.log(userToken);
+
+       // 2. Extract company name from email
+       const company = email.split('@')[1].split('.')[0];
+        
+       // 3. Check admin status with backend
+       const { isAdmin } = await checkAdminStatus(email);
+       
+       // 4. Toggle admin UI
+       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+       
+       // 5. If admin, load company config
+       if (isAdmin) {
+           const config = await getCompanyConfig(company);
+           document.getElementById('apiKey').value = config.openaiKey || '';
+           document.getElementById('onedriveLink').value = config.onedriveLink || '';
+       }
+
+    
     } catch (error) {
       document.getElementById("userInfo").innerHTML =
         "An error occurred. <br>Name: " +
@@ -75,34 +93,53 @@ Office.onReady((info) => {
   }
   
 
-async function getUserEmail() {
-
-  try {
-
-    const accessToken = await Office.context.auth.getAccessToken(["user.read"]);
-    insertDebugMessage(`get acces stoekmn ${accessToken}`)
-
-    const graphResponse = await fetch(`https://graph.microsoft.com/v1.0/me`, {
-
-      headers: {
-
-        "Authorization": `Bearer ${accessToken}`
-
-      }
-
-    });
-
-    const user = await graphResponse.json();
-
-    return user.userPrincipalName; // Returns the user's email address
-
-  } catch (error) {
-
-    insertDebugMessage("Error retrieving user email:", error);
-
-  }
-
+  function getCompanyFromEmail(email) {
+    // user@company.domain → "company"
+    const domainPart = email.split('@')[1];
+    return domainPart.split('.')[0];
 }
+
+
+async function getCompanyConfig(company) {
+    try {
+        const response = await axios.get(`https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/company-config/${company}`);
+        return response.data;
+    } catch (error) {
+        console.error('Config load failed:', error);
+        return {};
+    }
+}
+
+async function saveConfig() {
+    try {
+        const email = jwtDecode(await Office.auth.getAccessToken()).preferred_username;
+        const company = email.split('@')[1].split('.')[0];
+        
+        await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/save-config', {
+            company,
+            openaiKey: document.getElementById('apiKey').value,
+            onedriveLink: document.getElementById('onedriveLink').value
+        });
+        
+        alert('Settings saved successfully!');
+    } catch (error) {
+        console.error('Save failed:', error);
+        alert('Failed to save settings');
+    }
+}
+
+
+// Simplified backend calls
+async function checkAdminStatus(email) {
+    try {
+        const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', { email });
+        return response.data;
+    } catch (error) {
+        console.error('Admin check failed:', error);
+        return { isAdmin: false };
+    }
+}
+
 // Function to handle DOCX upload
 function handleDocxUpload(event) {
     const file = event.target.files[0];
@@ -270,69 +307,6 @@ async function extractPlaceholdersFromDocument(context) {
 
 
 // --------------------- now we are working on the login functionality ---------------------------
-
-async function getLoggedInUser() {
-    try {
-        insertDebugMessage("Starting Office auth process...");
-        
-        const tokenResult = await new Promise((resolve, reject) => {
-            Office.context.auth.getUserIdentityTokenAsync((result) => {
-                if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    insertDebugMessage("Office auth token received");
-                    resolve(result.value);
-                } else {
-                    insertDebugMessage(`Office auth failed: ${result.error.message}`);
-                    reject(new Error(result.error.message));
-                }
-            });
-        });
-
-        insertDebugMessage(`Raw Office token: ${tokenResult.substring(0, 50)}...`);
-        
-        const response = await axios.post('/api/get-user', {}, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tokenResult}`
-            }
-        });
-
-        insertDebugMessage("Backend response received:");
-        insertDebugMessage(JSON.stringify(response.data, null, 2));
-        
-        console.log("Full user data:", response.data);
-        return response.data;
-        
-    } catch (error) {
-        insertDebugMessage(`Error in getLoggedInUser: ${error.message}`);
-        console.error("Full error:", error);
-        if (error.response) {
-            insertDebugMessage(`Backend error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
-        }
-        throw error;
-    }
-}
-
-// Usage with error handling
-getLoggedInUser()
-    .then(user => {
-        insertDebugMessage("User info successfully retrieved:");
-        insertDebugMessage(`Name: ${user.displayName}`);
-        insertDebugMessage(`Email: ${user.mail}`);
-    })
-    .catch(error => {
-        insertDebugMessage("Failed to get user info:");
-        insertDebugMessage(error.message);
-    });
-
-// Helper function to display debug messages
-
-
-
-
-
-
-
-
 // UI Controller for the Admin Page
 class AdminUIController {
   constructor() {
@@ -429,298 +403,6 @@ Office.onReady((info) => {
     insertDebugMessage("Office is not Word. Not initializing Admin UI Controller.");
   }
 });
-
-// Main initialization: get user email and toggle admin UI.
-// async function initializeTaskPane() {
-//   try {
-//     const userEmail = await getUserEmail();
-//     insertDebugMessage("Logged-in user email: " + userEmail);
-//     console.log("Logged-in user email:", userEmail);
-
-//     const isAdminUser = isAdmin(userEmail);
-//     insertDebugMessage("Is admin: " + isAdminUser);
-//     toggleAdminForm(isAdminUser);
-//   } catch (error) {
-//     console.error("Error initializing task pane:", error);
-//     insertDebugMessage(`Error initializing task pane: " + ${error.message}`);
-//   }
-// }
-
-// const msalConfig = {
-//     auth: {
-//         clientId: "2ac7289e-19ec-4832-bfff-16c6a8b4e8b2",
-//         authority: "https://login.microsoftonline.com/222b4ff3-1b3c-4051-b2b8-76349ee3788c",
-//         redirectUri: "https://wonderful-mud-072c2710f.6.azurestaticapps.net"
-//     }
-// };
-
-// const msalInstance = new PublicClientApplication(msalConfig);
-
-// async function getToken() {
-//     const request = { scopes: ["User.Read"] };
-//     try {
-//         const response = await msalInstance.acquireTokenSilent(request);
-//         return response.accessToken;
-//     } catch (error) {
-//         if (error instanceof InteractionRequiredAuthError) {
-//             return await msalInstance.acquireTokenPopup(request);
-//         }
-//         throw error;
-//     }
-// }
-
-// async function checkAdminStatus() {
-//     try {
-//         const token = await getToken();
-//         const response = await axios.get('/api/check-admin', {
-//             headers: { Authorization: `Bearer ${token}` }
-//         });
-        
-//         return response.data.isAdmin;
-//     } catch (error) {
-//         console.error('Admin check failed:', error);
-//         return false;
-//     }
-// }
-
-// async function initializeTaskPane() {
-//     try {
-//         const isAdmin = await isAdmin();
-//         toggleAdminForm(isAdmin);
-//     } catch (error) {
-//         console.error('Initialization failed:', error);
-//     }
-// }
-
-// function toggleAdminForm(isAdmin) {
-//     document.getElementById('adminPage').style.display = isAdmin ? 'block' : 'none';
-//     document.getElementById('loginButton').style.display = isAdmin ? 'none' : 'block';
-// }
-
-// // Initialize when Office is ready
-// Office.onReady(() => {
-//     if (Office.context.host === Office.HostType.Word) {
-//         initializeTaskPane();
-//     }
-// });
-
-// Retrieves the signed-in user's email using Office SSO and Microsoft Graph.
-// function getUserEmail() {
-//         insertDebugMessage("inside get userPrompt: " );
-
-//   return new Promise((resolve, reject) => {
-//     Office.context.auth.getAccessTokenAsync((result) => {
-//       if (result.status === Office.AsyncResultStatus.Succeeded) {
-//         const token = result.value;
-//             insertDebugMessage(`do we have the token ${token}`);
-
-//         // Call Microsoft Graph to get the user's profile.
-//         fetch("https://graph.microsoft.com/v1.0/me", {
-//           headers: {
-//             "Authorization": "Bearer " + token,
-//             "Content-Type": "application/json"
-//           }
-//         })
-//           .then((response) => {
-//             if (!response.ok) {
-//               reject(new Error("Failed to fetch user profile: " + response.statusText));
-//             }
-//             return response.json();
-//           })
-//           .then((data) => {
-//             const email = data.mail || data.userPrincipalName;
-//             if (email) {
-//               resolve(email);
-//             } else {
-//               reject(new Error("No email found in user profile."));
-//             }
-//           })
-//           .catch((error) => reject(error));
-//       } else {
-//         reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
-//       }
-//     });
-//   });
-// }
-
-// function getUserEmail() {
-//   return new Promise((resolve, reject) => {
-//     Office.context.auth.getAccessTokenAsync((result) => {
-//       if (result.status === Office.AsyncResultStatus.Succeeded) {
-//         const token = result.value;
-//         // Now call Graph
-//         fetch("https://graph.microsoft.com/v1.0/me", {
-//           headers: {
-//             Authorization: "Bearer " + token,
-//           },
-//         })
-//           .then((resp) => {
-//             if (!resp.ok) {
-//               return resp.text().then((text) => {
-//                 reject(new Error("Failed to fetch user: " + resp.status + " " + text));
-//               });
-//             }
-//             return resp.json();
-//           })
-//           .then((data) => {
-//             const email = data.mail || data.userPrincipalName;
-//             if (email) {
-//               resolve(email);
-//             } else {
-//               reject(new Error("No email in profile."));
-//             }
-//           })
-//           .catch((err) => reject(err));
-//       } else {
-//         reject(new Error("Failed to get token: " + JSON.stringify(result.error)));
-//       }
-//     });
-//   });
-// }
-
-
-// // List of admin emails. Adjust these values as needed.
-// function isAdmin(email) {
-//   const adminEmails = [
-//     "c0914148@mylambton.ca",
-//     "admin2@example.com",
-//     "monisha@kubetools.onmicrosoft.com"
-//   ];
-//   return adminEmails.includes(email.toLowerCase());
-// }
-
-// // Toggle visibility of the admin settings form based on admin status.
-// function toggleAdminForm(isAdminUser) {
-//   const adminPage = document.getElementById("adminPage");
-//   const loginButton = document.getElementById("loginButton");
-
-//   if (isAdminUser) {
-//     adminPage.style.display = "block"; // Show admin settings.
-//     loginButton.style.display = "none"; // Hide login button.
-//   } else {
-//     adminPage.style.display = "none";  // Hide admin settings.
-//     loginButton.style.display = "block"; // Show login button.
-//   }
-// }
-
-// Debug helper: log messages both to console and (if exists) a debug div.
-
-// Main function: Called when Office.js is ready
-
-// List of admin emails (replace with your actual admin emails or fetch from a database)
-
-// Function to get an access token using SSO
-// Function to get an access token using SSO
-
-
-
-// List of admin emails (replace with your actual admin emails or fetch from a database)
-
-
-// const msalInstance = new PublicClientApplication(msalConfig);
-
-// async function getUserToken() {
-//   const request = { scopes: ["User.Read"] };
-//   try {
-//     const response = await msalInstance.acquireTokenSilent(request);
-//     return response.accessToken;
-//   } catch (error) {
-//     if (error instanceof InteractionRequiredAuthError) {
-//       const response = await msalInstance.acquireTokenPopup(request);
-//       return response.accessToken;
-//     } else {
-//       throw error;
-//     }
-//   }
-// }
-
-// async function getUserEmail() {
-//     insertDebugMessage(`Fhere is user email function `);
-
-//     try {
-//         // Get the access token
-//         const accessToken = await getAccessToken();
-//         // const accessToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6InA5bnc2NGJodlJPRDVISWlzRTFJU1VJWTZoVW9HYVNHTlBiTEZ1LU16MmciLCJhbGciOiJSUzI1NiIsIng1dCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayIsImtpZCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yMjJiNGZmMy0xYjNjLTQwNTEtYjJiOC03NjM0OWVlMzc4OGMvIiwiaWF0IjoxNzQwNTI4MTk1LCJuYmYiOjE3NDA1MjgxOTUsImV4cCI6MTc0MDUzMjA5NSwiYWlvIjoiazJSZ1lGRExmN1hQa3QzWHRPUGI1UGdVOGZnN0FBPT0iLCJhcHBfZGlzcGxheW5hbWUiOiJXb3JkIFBsdWdpbiBBUEkiLCJhcHBpZCI6IjJhYzcyODllLTE5ZWMtNDgzMi1iZmZmLTE2YzZhOGI0ZThiMiIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzIyMmI0ZmYzLTFiM2MtNDA1MS1iMmI4LTc2MzQ5ZWUzNzg4Yy8iLCJpZHR5cCI6ImFwcCIsIm9pZCI6ImQwODdkYTYzLWUxOGEtNDEzZS05YzhhLTIwOGU4OWI5ZGIzNiIsInJoIjoiMS5BVzhCODA4cklqd2JVVUN5dUhZMG51TjRqQU1BQUFBQUFBQUF3QUFBQUFBQUFBQndBUUJ2QVEuIiwicm9sZXMiOlsiVXNlci5SZWFkQmFzaWMuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFwcEZvbGRlciIsIlVzZXIuUmVhZFdyaXRlLkFsbCIsIkZpbGVzLlNlbGVjdGVkT3BlcmF0aW9ucy5TZWxlY3RlZCIsIlNpdGVzLlJlYWQuQWxsIiwiU2l0ZXMuUmVhZFdyaXRlLkFsbCIsIkZpbGVzLlJlYWRXcml0ZS5BbGwiLCJVc2VyLlJlYWQuQWxsIiwiRmlsZXMuUmVhZC5BbGwiLCJFeHRlcm5hbFVzZXJQcm9maWxlLlJlYWQuQWxsIiwiRXh0ZXJuYWxVc2VyUHJvZmlsZS5SZWFkV3JpdGUuQWxsIl0sInN1YiI6ImQwODdkYTYzLWUxOGEtNDEzZS05YzhhLTIwOGU4OWI5ZGIzNiIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJOQSIsInRpZCI6IjIyMmI0ZmYzLTFiM2MtNDA1MS1iMmI4LTc2MzQ5ZWUzNzg4YyIsInV0aSI6IlJaWGl4dks1aGthRkt0XzFOVEdCQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbIjA5OTdhMWQwLTBkMWQtNGFjYi1iNDA4LWQ1Y2E3MzEyMWU5MCJdLCJ4bXNfaWRyZWwiOiI0IDciLCJ4bXNfdGNkdCI6MTczNzA3MDE3NX0.ml6xtpa-oPTay9RexC_poZeAj4J4efFZU4UbCsqdvK5Maf_KwTOuaFCy4B8IiPURtWWHSjISFBgXm7nS46_lt18PODcsuUgkrSbVb39UHjsDcTyNHF1sHKMV9LtLwnlPRBBXNO-lJNUv8unatdw2XI0W5BUkWWDyY_SHqfe4U9_R0q5jsTkGjJUdpDGwDl1rltrMb_MqbJm_YqPoSo9Lfshz0x-_1dsWg9b8_38w9st8_eV5PQ4GFzE5hmdfjsFhkBDAdZ8aFqUaXBxp2qrQEEgEmFuuXkDh120hApdjyBinRz7Fn5160C6Wpp4mlN4owsGsqZo1zF9NgXbg434uGQ"
-//         insertDebugMessage(`Access token:", ${accessToken}`); // Log the access token
-
-//         // Call Microsoft Graph API to fetch the user's profile
-//         const response = await fetch("https://graph.microsoft.com/v1.0/me", {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//             },
-//         });
-
-//         if (!response.ok) {
-//             const error = new Error("Failed to fetch user profile.");
-//             console.error("Failed to fetch user profile:", response.statusText);
-//             throw error;
-//         }
-
-//         const userProfile = await response.json();
-//         insertDebugMessage(`User profile:", ${userProfile}`); // Log the user profile
-//         return userProfile.mail || userProfile.userPrincipalName; // Return the user's email
-//     } catch (error) {
-//         console.error("Error fetching user email:", error);
-//         throw error;
-//     }
-// }
-
-
-// function handleError(error) {
-//     console.error("Error details:", error); // Log the full error object
-//     console.error("Error message:", error.message); // Log the error message
-//     console.error("Error stack:", error.stack); // Log the error stack trace
-//     insertDebugMessage("Error: " + error.message); // Display the error in the UI
-// }
-
-
-// Office.onReady((info) => {
-//     if (info.host === Office.HostType.Word) {
-//         insertDebugMessage("Office.js is ready. Attempting to get SSO token...");
-//         getSSOTokenAndFetchUser();
-//     }
-// });
-
-// // Function to get SSO token using Office.context.auth.getAccessTokenAsync
-// function getSSOTokenAndFetchUser() {
-//     Office.context.auth.getAccessTokenAsync((result) => {
-//         if (result.status === Office.AsyncResultStatus.Succeeded) {
-//             let token = result.value;
-//             insertDebugMessage("Access token retrieved successfully.");
-//             // Now use the token to call Microsoft Graph API
-//             fetchUserInfo(token);
-//         } else {
-//             insertDebugMessage("Failed to get access token: " + JSON.stringify(result.error));
-//         }
-//     });
-// }
-
-// // Function to call Microsoft Graph API and fetch the user's email
-// function fetchUserInfo(accessToken) {
-//     insertDebugMessage("Fetching user info from Microsoft Graph...");
-//     fetch("https://graph.microsoft.com/v1.0/me", {
-//         headers: { Authorization: `Bearer ${accessToken}` }
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         // Log the full response for debugging
-//         insertDebugMessage("Microsoft Graph API response: " + JSON.stringify(data));
-//         let userEmail = data.mail || data.userPrincipalName;
-//         if (!userEmail) {
-//             insertDebugMessage("No email found in the Microsoft Graph response.");
-//             return;
-//         }
-//         insertDebugMessage("User email retrieved: " + userEmail);
-//         // At this point, you have the user's email.
-//         // For example, extract the domain:
-//         let domain = userEmail.split("@")[1];
-//         insertDebugMessage("User domain: " + domain);
-//         // Next, you can use the email (or domain) to look up company-specific settings from your backend.
-//     })
-//     .catch(error => {
-//         insertDebugMessage("Error fetching user info from Graph: " + error);
-//     });
-// }
 
 
 const templates = {

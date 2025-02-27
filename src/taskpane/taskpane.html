@@ -44,20 +44,22 @@
             <span id="userInfo"></span>
         </div>
         
-        <!-- Admin Page (Hidden by Default) -->
-        <div id="adminPage" style="display: none;">
+         <!-- Container for debug messages -->
+        <div id="debugMessages" style="border: 1px solid #ccc; padding: 10px; margin-top:10px;"></div>
+        
+        <!-- Keep only these admin elements -->
+        <section id="adminSection" style="display: none;">
             <h2>Admin Settings</h2>
-            <label>OneDrive Folder Link:</label>
-            <input type="text" id="oneDriveLink" placeholder="Enter OneDrive folder link" />
-            
-            <label>ChatGPT API Key:</label>
-            <input type="password" id="apiKey" placeholder="Enter API Key" />
-
-            <button id="saveAdminSettings" class="button primary-button">Save Settings</button>
-        </div>
-
-        <!-- Login Button -->
-        <button id="loginButton">Login as Admin</button>
+            <div class="form-group">
+                <label>OpenAI Key:</label>
+                <input type="password" id="apiKey">
+            </div>
+            <div class="form-group">
+                <label>OneDrive Link:</label>
+                <input type="text" id="onedriveLink">
+            </div>
+            <button id="saveAdminSettings">Save</button>
+        </section>
 
         <section class="template-section">
             <h2>Select Template</h2>
