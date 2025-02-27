@@ -63,14 +63,14 @@ Office.onReady((info) => {
         userToken.oid;
       insertDebugMessage(userToken);
 
-    //    // 2. Extract company name from email
-    //    const company = email.split('@')[1].split('.')[0];
+       // 2. Extract company name from email
+       const company = email.split('@')[1].split('.')[0];
         
-    //    // 3. Check admin status with backend
-    //    const { isAdmin } = await checkAdminStatus(email);
+       // 3. Check admin status with backend
+       const { isAdmin } = await checkAdminStatus(email);
        
-    //    // 4. Toggle admin UI
-    //    document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+       // 4. Toggle admin UI
+       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
        
     //    // 5. If admin, load company config
     //    if (isAdmin) {
@@ -134,7 +134,7 @@ async function checkAdminStatus(email) {
         const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', { email });
         return response.data;
     } catch (error) {
-        console.error('Admin check failed:', error);
+        insertDebugMessage(`Admin check failed:', ${error}`);
         return { isAdmin: false };
     }
 }
