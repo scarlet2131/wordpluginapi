@@ -63,21 +63,21 @@ Office.onReady((info) => {
         userToken.oid;
       console.log(userToken);
 
-       // 2. Extract company name from email
-       const company = email.split('@')[1].split('.')[0];
+    //    // 2. Extract company name from email
+    //    const company = email.split('@')[1].split('.')[0];
         
-       // 3. Check admin status with backend
-       const { isAdmin } = await checkAdminStatus(email);
+    //    // 3. Check admin status with backend
+    //    const { isAdmin } = await checkAdminStatus(email);
        
-       // 4. Toggle admin UI
-       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+    //    // 4. Toggle admin UI
+    //    document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
        
-       // 5. If admin, load company config
-       if (isAdmin) {
-           const config = await getCompanyConfig(company);
-           document.getElementById('apiKey').value = config.openaiKey || '';
-           document.getElementById('onedriveLink').value = config.onedriveLink || '';
-       }
+    //    // 5. If admin, load company config
+    //    if (isAdmin) {
+    //        const config = await getCompanyConfig(company);
+    //        document.getElementById('apiKey').value = config.openaiKey || '';
+    //        document.getElementById('onedriveLink').value = config.onedriveLink || '';
+    //    }
 
     
     } catch (error) {
