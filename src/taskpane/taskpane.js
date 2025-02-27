@@ -66,13 +66,13 @@ Office.onReady((info) => {
 
     //    // 2. Extract company name from email
        const email = userToken.preferred_username
-       const company = userToken.email.split('@')[1].split('.')[0];
+       const company = email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
        const { isAdmin } = await checkAdminStatus(email);
        
-    //    // 4. Toggle admin UI
-    //    document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+       // 4. Toggle admin UI
+       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
        
     //    // 5. If admin, load company config
     //    if (isAdmin) {
@@ -134,6 +134,8 @@ async function saveConfig() {
 async function checkAdminStatus(email) {
     try {
         const response = await axios.post('https://91c3-2607-fea8-fc01-7009-d565-1912-5fb0-9036.ngrok-free.app/api/check-admin', { email });
+        insertDebugMessage(`Admin check result:', ${response}`);
+
         return response.data;
     } catch (error) {
         insertDebugMessage(`Admin check failed:', ${error}`);
