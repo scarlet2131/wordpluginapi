@@ -94,6 +94,8 @@ Office.onReady((info) => {
         if (is_admin && config) {
             document.getElementById('apiKey').value = config.openai_key || '';
             document.getElementById('onedriveLink').value = config.onedrive_link || '';
+        }else{
+            document.getElementById("debugMessages").innerHTML = "You do not have Admin Permission"
         }
 
 
