@@ -8,7 +8,7 @@ import { jwtDecode, JwtPayload } from 'jwt-decode'
 let currentPlaceholders = {};
 
 // Event listeners for buttons in the task pane
-document.getElementById("loadTemplate").addEventListener("click", loadTemplate);
+// document.getElementById("loadTemplate").addEventListener("click", loadTemplate);
 document.getElementById("applyEditedPlaceholders").addEventListener("click", updatePlaceholders);
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
 document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
