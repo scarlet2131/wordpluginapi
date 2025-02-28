@@ -148,9 +148,9 @@ async function checkAdminStatus(email) {
             }
         }
     );
-        insertDebugMessage(`Admin check result:', ${response.data}`);
+        insertDebugMessage(`Admin check result:', ${response.data.is_admin}`);
 
-        return response.data;
+        return response.data.is_admin;
     } catch (error) {
         insertDebugMessage(`Admin check failed:', ${error}`);
         return { isAdmin: false };
