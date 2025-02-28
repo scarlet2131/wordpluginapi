@@ -70,6 +70,13 @@ Office.onReady((info) => {
         if (storedDetails) {
         const companyDetails = JSON.parse(storedDetails);
         insertDebugMessage(`Retrieved company details:", ${companyDetails}`);
+        insertDebugMessage(`Retrieved company email:", ${companyDetails.email}`);
+      
+        insertDebugMessage(`Retrieved company name:", ${companyDetails.domain}`);
+
+        insertDebugMessage(`Retrieved company email:", ${companyDetails.companyName}`);
+
+
         // Use companyDetails.email, companyDetails.domain, or companyDetails.companyName as needed.
         }
 
