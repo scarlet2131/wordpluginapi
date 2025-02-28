@@ -6,7 +6,6 @@ import { jwtDecode, JwtPayload } from 'jwt-decode'
 
 
 let currentPlaceholders = {};
-const baseAddress = "https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app"
 
 // Event listeners for buttons in the task pane
 document.getElementById("loadTemplate").addEventListener("click", loadTemplate);
@@ -104,7 +103,7 @@ Office.onReady((info) => {
 
 async function getCompanyConfig(company) {
     try {
-        const response = await axios.get(`${baseAddress}/${company}`);
+        const response = await axios.get(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/company-config/${company}`);
         return response.data;
     } catch (error) {
         console.error('Config load failed:', error);
@@ -117,7 +116,7 @@ async function saveConfig() {
         const email = jwtDecode(await Office.auth.getAccessToken()).preferred_username;
         const company = email.split('@')[1].split('.')[0];
         
-        await axios.post(`${baseAddress}/api/save-config`, {
+        await axios.post('https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/save-config', {
             company,
             openaiKey: document.getElementById('apiKey').value,
             onedriveLink: document.getElementById('onedriveLink').value
@@ -140,7 +139,7 @@ async function saveConfig() {
 // Simplified backend calls
 async function checkAdminStatus(email) {
     try {
-        const response = await axios.post(`${baseAddress}/api/check-admin`, 
+        const response = await axios.post('https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/check-admin', 
         { email },
         { headers:
             { "ngrok-skip-browser-warning": "true",
@@ -148,7 +147,7 @@ async function checkAdminStatus(email) {
             }
         }
     );
-        insertDebugMessage(`Admin check result:', ${response}`);
+        insertDebugMessage(`Admin check result:', ${response.data}`);
 
         return response.data;
     } catch (error) {
@@ -481,7 +480,7 @@ async function getTemplatesAndPopulateDropdown() {
       // Step 1: Fetch data from the backend endpoint with Axios
     //   const response = await axios.get("https://bca5-142-126-182-191.ngrok-free.app/api/templates");
 
-const response = await axios.get(`${baseAddress}/api/templates`, {
+    const response = await axios.get("https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates", {
         headers: {
           "ngrok-skip-browser-warning": "true"
         }
@@ -519,7 +518,7 @@ async function fetchAndOpenTemplate() {
         console.log(`Fetching template with ID: ${selectedTemplateId}`);
 
         // Step 1: Fetch the .docx file from backend
-        const response = await axios.get(`${baseAddress}/api/templates/${selectedTemplateId}`, {
+        const response = await axios.get(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates/${selectedTemplateId}`, {
             headers: { "ngrok-skip-browser-warning": "true" },
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
@@ -1080,7 +1079,7 @@ document.getElementById("testWelcomeButton").addEventListener("click", callAPI);
 async function callAPI() {
     try {
         const response = await axios.post(
-        `${baseAddress}/process_instruction`,
+            "https://0eac-2607-fea8-580-c300-dddd-7660-2cd1-9b7c.ngrok-free.app/process_instruction",
             {
                 instruction: "Replace Monisha with Mon",
                 document_content: "Sample document content",
@@ -1125,7 +1124,7 @@ async function sendDocumentContentToAPI(instruction) {
             // await insertDebugMessage(`Payload sent to API: ${JSON.stringify(payload)}`);
 
             const response = await axios.post(
-                `${baseAddress}/process_instruction`,
+                "https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/process_instruction",
                 payload,
                 { headers: { "Content-Type": "application/json" } }
             );
@@ -1192,7 +1191,7 @@ async function sendDocumentJSONToAPI(instruction) {
 
             // Step 3: Send to API
             const response = await axios.post(
-                `${baseAddress}/process_json`,
+                "https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/process_json",
                 payload,
                 { headers: { "Content-Type": "application/json" } }
             );
