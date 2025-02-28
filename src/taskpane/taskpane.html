@@ -1,131 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Word Add-in</title>
 
     <!-- Office JavaScript API -->
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
     <!-- PizZip and Docxtemplater from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.min.js"></script>
-    <!-- <script src="Scripts/jwt-decode-2.2.0.js" type="text/javascript"></script> -->
-
-
-
     <!-- Fluent UI -->
-    <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css" />
-
-  
+    <link
+      rel="stylesheet"
+      href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"
+    />
     <!-- Custom Styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
-    
-</head>
+  </head>
 
-<body class="ms-Fabric">
+  <body class="ms-Fabric">
     <header class="header">
-        <img src="../../assets/logo-filled.png" alt="Word Add-in" width="80" height="80" />
-        <h1>AI-Driven Word Add-in</h1>
+      <img src="../../assets/logo-filled.png" alt="Word Add-in" width="80" height="80" />
+      <h1>AI-Driven Word Add-in</h1>
     </header>
 
     <main class="main-content">
+      <button id="getIDToken">Login as Admin</button>
 
+      <!-- Debug Messages Container -->
+      <div id="debugMessages" class="debug-container"></div>
 
-        <button id="getIDToken">Login as Admin</button>
-        <!-- <div>
-            <span id="userInfo"></span>
-        </div> -->
-        
-         <!-- Container for debug messages -->
-        <div id="debugMessages" style="border: 1px solid #ccc; padding: 10px; margin-top:10px;"></div>
-        
-        <!-- Keep only these admin elements -->
-        <section id="adminSection" style="display: none;">
-            <h2>Admin Settings</h2>
-            <div class="form-group">
-                <label>OpenAI Key:</label>
-                <input type="password" id="apiKey">
-            </div>
-            <div class="form-group">
-                <label>OneDrive Link:</label>
-                <input type="text" id="onedriveLink">
-            </div>
-            <button id="saveAdminSettings">Save</button>
-        </section>
+      <!-- Admin Settings Section -->
+      <section id="adminSection" class="admin-section" style="display: none;">
+        <h2>Admin Settings</h2>
+        <div class="form-group">
+          <label for="apiKey">OpenAI Key:</label>
+          <input type="password" id="apiKey" class="input-field" />
+        </div>
+        <div class="form-group">
+          <label for="onedriveLink">OneDrive Link:</label>
+          <input type="text" id="onedriveLink" class="input-field" />
+        </div>
+        <button id="saveAdminSettings" class="button primary-button">Save</button>
+      </section>
 
-        <section class="template-section">
-            <h2>Select Template</h2>
-            <div class="form-group">
-                <select id="templateSelector" class="input-field">
-                    <option value="template1">Template 1</option>
-                    <option value="template2">Template 2</option>
-                </select>
-                <button id="loadTemplate" class="button primary-button">Load Template</button>
-            </div>
-        </section>
+      <!-- Template Section -->
+      <section class="template-section">
+        <h2>Select Template</h2>
+        <div class="form-group">
+          <select id="templateSelector" class="input-field">
+            <option value="template1">Template 1</option>
+            <option value="template2">Template 2</option>
+          </select>
+          <button id="loadTemplate" class="button primary-button">Load Template</button>
+        </div>
+      </section>
 
-        <select id="templatesDropdown"></select>
-        <button id="templatesBtn">Load Templates</button>
-        <button id="openTemplateBtn">Open Template</button>
+      <div class="template-actions">
+        <select id="templatesDropdown" class="input-field"></select>
+        <button id="templatesBtn" class="button">Load Templates</button>
+        <button id="openTemplateBtn" class="button">Open Template</button>
+      </div>
 
+      <!-- Template Upload Section -->
+      <section class="template-upload-section">
+        <h2>Upload Template (.docx)</h2>
+        <input type="file" id="docxFileInput" accept=".docx" class="input-field" />
+        <p id="uploadStatus"></p>
+      </section>
 
-        <!-- Template Upload Section -->
-        <section class="template-upload-section">
-            <h2>Upload Template (.docx)</h2>
-            <input type="file" id="docxFileInput" accept=".docx" />
-            <p id="uploadStatus"></p>
-        </section>
-        
-        <section id="editPlaceholderFields">
-            <!-- Dynamic form fields will be injected here -->
-        </section>
-        
-        <button id="applyEditedPlaceholders">Apply Changes</button>
-        <p id="debugMessages"></p>
-        
+      <!-- Dynamic Placeholder Edit Section -->
+      <section id="editPlaceholderFields" class="edit-placeholder-fields">
+        <!-- Dynamic form fields will be injected here -->
+      </section>
+      <button id="applyEditedPlaceholders" class="button">Apply Changes</button>
 
-        <section class="ai-redlining-section">
-            <h2>AI Redlining</h2>
-            <label for="aiPromptInput" class="input-label">Enter a prompt for AI suggestions:</label>
-            <input type="text" id="aiPromptInput" class="input-field" placeholder="Type your prompt here" />
-            <div class="button-group">
-                <button id="generateAIChanges" class="button primary-button">Generate AI Suggestions</button>
-                <button id="generateAIChangesWithContext" class="button secondary-button">Generate AI with Context</button>
-                <button id="enableTrackChanges" class="button">Enable Track Changes</button>
-                <button id="applyRedlines" class="button">Apply Redlines</button>
-                <button id="disableAllChanges" class="button danger-button">Disable All Changes</button>
-            </div>
-        </section>
+      <!-- AI Redlining Section -->
+      <section class="ai-redlining-section">
+        <h2>AI Redlining</h2>
+        <label for="aiPromptInput" class="input-label">Enter a prompt for AI suggestions:</label>
+        <input type="text" id="aiPromptInput" class="input-field" placeholder="Type your prompt here" />
+        <div class="button-group">
+          <button id="generateAIChangesWithContext" class="button secondary-button">AI Readlining</button>
+          <button id="enableTrackChanges" class="button">Enable Track Changes</button>
+          <button id="disableAllChanges" class="button danger-button">Disable All Changes</button>
+        </div>
+      </section>
 
-        <section class="review-changes-section">
-            <h2>Review Changes</h2>
-            <div id="trackedChangesList" class="change-list">
-                <!-- Tracked changes will be listed dynamically here -->
-            </div>
-            <div id="proposedChangesContainer"></div>
-
-            <div class="button-group">
-                <button id="listTrackedChanges" class="button">List Tracked Changes</button>
-                <button id="acceptSelectedChanges" class="button">Accept Selected</button>
-                <button id="rejectSelectedChanges" class="button">Reject Selected</button>
-                <button id="acceptAllChanges" class="button primary-button">Accept All</button>
-                <button id="rejectAllChanges" class="button danger-button">Reject All</button>
-                
-
-            </div>
-            <!-- Add this where you want to show the JSON content -->
-
-
-        </section>
+      <!-- Review Changes Section -->
+      <section class="review-changes-section">
+        <h2>Review Changes</h2>
+        <div id="trackedChangesList" class="change-list">
+          <!-- Tracked changes will be listed dynamically here -->
+        </div>
+        <div id="proposedChangesContainer" class="proposed-changes"></div>
+        <div class="button-group">
+          <button id="listTrackedChanges" class="button">List Tracked Changes</button>
+          <button id="acceptSelectedChanges" class="button">Accept Selected</button>
+          <button id="rejectSelectedChanges" class="button">Reject Selected</button>
+          <button id="acceptAllChanges" class="button primary-button">Accept All</button>
+          <button id="rejectAllChanges" class="button danger-button">Reject All</button>
+        </div>
+      </section>
     </main>
 
     <footer class="footer">
-        <p>Enhance your Word documents with AI-driven suggestions and seamless workflows.</p>
+      <p>Enhance your Word documents with AI-driven suggestions and seamless workflows.</p>
     </footer>
-    
-</body>
-
+  </body>
 </html>
