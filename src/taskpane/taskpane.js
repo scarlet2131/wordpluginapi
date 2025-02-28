@@ -70,6 +70,7 @@ Office.onReady((info) => {
         
        // 3. Check admin status with backend
        const { isAdmin } = await checkAdminStatus(email);
+       insertDebugMessage(`printingt he admin, ${isAdmin}`)
        
        // 4. Toggle admin UI
        document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
