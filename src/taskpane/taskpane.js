@@ -12,7 +12,6 @@ document.getElementById("loadTemplate").addEventListener("click", loadTemplate);
 document.getElementById("applyEditedPlaceholders").addEventListener("click", updatePlaceholders);
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
 document.getElementById("applyRedlines").addEventListener("click", applyRedlines);
-document.getElementById("generateAIChanges").addEventListener("click", generateAIChanges);
 document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
 
 document.getElementById("disableAllChanges").addEventListener("click", disableAllChanges);
@@ -107,14 +106,9 @@ Office.onReady((info) => {
       
 
     } catch (error) {
-    //   document.getElementById("userInfo").innerHTML =
-    //     "An error occurred. <br>Name: " +
-    //     error.name +
-    //     "<br>Code: " +
-    //     error.code +
-    //     "<br>Message: " +
-    //     error.message;
-      console.log(error);
+    //   console.log(error);
+      document.getElementById("debugMessages").innerHTML = error
+
     }
   }
   
@@ -380,119 +374,21 @@ async function extractPlaceholdersFromDocument(context) {
 }
 
 
-// --------------------- now we are working on the login functionality ---------------------------
-// UI Controller for the Admin Page
-class AdminUIController {
-  constructor() {
-    this.authManager = new ClientAuthManager();
-    this.initializeUI();
-  }
 
-  async initializeUI() {
-    try {
-      insertDebugMessage("Initializing Admin UI...");
-      const isAdmin = await this.authManager.initialize();
-      insertDebugMessage("Admin status determined: " + isAdmin);
-      this.toggleAdminUI(isAdmin);
-      
-      if (isAdmin) {
-        this.loadAdminSettings();
-        document.getElementById("saveAdminSettings").addEventListener("click", this.saveSettings.bind(this));
-      }
-    } catch (error) {
-      console.error("Initialization failed:", error);
-      this.showError("Initialization failed. Please refresh.");
-    }
-  }
-
-  toggleAdminUI(isAdmin) {
-    insertDebugMessage("Toggling admin UI. isAdmin: " + isAdmin);
-    document.getElementById("adminPage").style.display = isAdmin ? "block" : "none";
-    document.getElementById("loginButton").style.display = isAdmin ? "none" : "block";
-  }
-
-  async loadAdminSettings() {
-    try {
-      insertDebugMessage("Loading admin settings...");
-      // Note: Office.context.roamingSettings.get returns the value directly (it’s not a promise)
-      const settings = Office.context.roamingSettings.get("adminConfig") || {};
-      document.getElementById("oneDriveLink").value = settings.oneDriveLink || "";
-      document.getElementById("apiKey").value = settings.apiKey || "";
-      insertDebugMessage("Admin settings loaded: " + JSON.stringify(settings));
-    } catch (error) {
-      this.showError("Failed to load settings");
-      insertDebugMessage("Error loading settings: " + error.message);
-    }
-  }
-
-  async saveSettings() {
-    try {
-      insertDebugMessage("Saving admin settings...");
-      const settings = {
-        oneDriveLink: document.getElementById("oneDriveLink").value,
-        apiKey: document.getElementById("apiKey").value
-      };
-      Office.context.roamingSettings.set("adminConfig", settings);
-      Office.context.roamingSettings.saveAsync((result) => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
-          this.showSuccess("Settings saved!");
-          insertDebugMessage("Admin settings saved successfully.");
-        } else {
-          this.showError("Failed to save settings");
-          insertDebugMessage("Error saving settings: " + JSON.stringify(result.error));
-        }
-      });
-    } catch (error) {
-      this.showError("Failed to save settings");
-      insertDebugMessage("Error in saveSettings: " + error.message);
-    }
-  }
-
-  showError(message) {
-    const errorDiv = document.getElementById("errorMessage");
-    if (errorDiv) {
-      errorDiv.textContent = message;
-      errorDiv.style.display = "block";
-    }
-    insertDebugMessage("Error: " + message);
-  }
-
-  showSuccess(message) {
-    const successDiv = document.getElementById("successMessage");
-    if (successDiv) {
-      successDiv.textContent = message;
-      successDiv.style.display = "block";
-      setTimeout(() => successDiv.style.display = "none", 3000);
-    }
-    insertDebugMessage("Success: " + message);
-  }
-}
-
-// Initialize the UI when Office is ready
-Office.onReady((info) => {
-  if (Office.context.host === Office.HostType.Word) {
-    insertDebugMessage("Office is ready. Initializing Admin UI Controller...");
-    new AdminUIController();
-  } else {
-    insertDebugMessage("Office is not Word. Not initializing Admin UI Controller.");
-  }
-});
-
-
-const templates = {
-    template1: {
-        header: "Header: {{Name}} - {{Date}}",
-        body: "Dear {{Name}},\nToday is {{Date}}.\nBest regards,\nYour Company.",
-        footer: "Footer: Sincerely, {{Signature}}",
-        placeholders: ["Name", "Date", "Signature"],
-    },
-    template2: {
-        header: "Appointment Reminder: {{Name}} - {{Date}}",
-        body: "Hello {{Name}},\nYour appointment is scheduled for {{Date}}.\nThank you!",
-        footer: "Footer: Best regards,\n{{Signature}}",
-        placeholders: ["Name", "Date", "AppointmentTime", "Signature"],
-    },
-};
+// const templates = {
+//     template1: {
+//         header: "Header: {{Name}} - {{Date}}",
+//         body: "Dear {{Name}},\nToday is {{Date}}.\nBest regards,\nYour Company.",
+//         footer: "Footer: Sincerely, {{Signature}}",
+//         placeholders: ["Name", "Date", "Signature"],
+//     },
+//     template2: {
+//         header: "Appointment Reminder: {{Name}} - {{Date}}",
+//         body: "Hello {{Name}},\nYour appointment is scheduled for {{Date}}.\nThank you!",
+//         footer: "Footer: Best regards,\n{{Signature}}",
+//         placeholders: ["Name", "Date", "AppointmentTime", "Signature"],
+//     },
+// };
 
 Office.onReady((info) => {
     if (info.host === Office.HostType.Word) {
@@ -504,34 +400,34 @@ Office.onReady((info) => {
 });
 
 
-async function loadTemplate() {
-    const templateKey = document.getElementById("templateSelector").value;
-    const template = templates[templateKey];
+// async function loadTemplate() {
+//     const templateKey = document.getElementById("templateSelector").value;
+//     const template = templates[templateKey];
 
-    await Word.run(async (context) => {
-        const sections = context.document.sections;
-        sections.load("items");
-        await context.sync();
+//     await Word.run(async (context) => {
+//         const sections = context.document.sections;
+//         sections.load("items");
+//         await context.sync();
 
-        sections.items.forEach((section) => {
-            const header = section.getHeader("Primary");
-            header.clear();
-            header.insertText(template.header, Word.InsertLocation.replace);
+//         sections.items.forEach((section) => {
+//             const header = section.getHeader("Primary");
+//             header.clear();
+//             header.insertText(template.header, Word.InsertLocation.replace);
 
-            const body = section.body;
-            body.clear();
-            body.insertText(template.body, Word.InsertLocation.start);
+//             const body = section.body;
+//             body.clear();
+//             body.insertText(template.body, Word.InsertLocation.start);
 
-            const footer = section.getFooter("Primary");
-            footer.clear();
-            footer.insertText(template.footer, Word.InsertLocation.replace);
-        });
+//             const footer = section.getFooter("Primary");
+//             footer.clear();
+//             footer.insertText(template.footer, Word.InsertLocation.replace);
+//         });
 
-        await context.sync();
-    });
+//         await context.sync();
+//     });
 
-    generateEditFields(template.placeholders);
-}
+//     generateEditFields(template.placeholders);
+// }
 
 async function getTemplatesAndPopulateDropdown() {
     try {
@@ -662,38 +558,6 @@ async function enableTrackChanges() {
 }
 
 
-async function generateAIChanges() {
-    const userPrompt = document.getElementById("aiPromptInput").value;
-    if (!userPrompt) {
-        console.error("No prompt provided.");
-        return;
-    }
-
-    await Word.run(async (context) => {
-        try {
-            const aiResponse = await getAIResponse(userPrompt);
-            if (!aiResponse) {
-                console.error("AI response is null or undefined.");
-                return;
-            }
-
-            const selection = context.document.getSelection();
-            selection.load("text");
-            await context.sync();
-
-            if (!selection.text) {
-                console.warn("No text selected. Inserting at cursor position.");
-            }
-
-            selection.insertText(aiResponse, Word.InsertLocation.replace);
-            await context.sync();
-
-            console.log("AI suggestion inserted successfully.");
-        } catch (error) {
-            console.error("Error in generateAIChanges:", error);
-        }
-    });
-}
 
 async function listTrackedChanges() {
     await Word.run(async (context) => {
@@ -814,9 +678,6 @@ async function disableAllChanges() {
         await context.sync();
     });
 }
-
-
-
 
 async function extractDocumentAsJSONAndInsert() {
     return await Word.run(async (context) => {
@@ -1117,9 +978,6 @@ async function applyAddOrUpdate(change) {
     });
 }
 
-
-
-
 async function applyChange(change) {
     if (change.action === "replace") {
         await applyReplace(change);
@@ -1128,98 +986,6 @@ async function applyChange(change) {
     } else {
         await insertDebugMessage(`Error: Unsupported action '${change.action}' for change_id ${change.change_id}.`);
     }
-}
-
-
-// Attach this function to a button click for testing
-document.getElementById("testWelcomeButton").addEventListener("click", callAPI);
-
-async function callAPI() {
-    try {
-        const response = await axios.post(
-            "https://0eac-2607-fea8-580-c300-dddd-7660-2cd1-9b7c.ngrok-free.app/process_instruction",
-            {
-                instruction: "Replace Monisha with Mon",
-                document_content: "Sample document content",
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        // await insertDebugMessage("API Response:", response.data);
-    } catch (error) {
-        // await insertDebugMessage("API Call Error:", error.message);
-    }
-}
-
-async function sendDocumentContentToAPI(instruction) {
-    await Word.run(async (context) => {
-        try {
-            
-            // Step 1: Retrieve document content
-            // const documentJSON = await extractDocumentAsJSONAndInsert();
-
-                    // ✅ Show JSON before sending to API
-        // displayExtractedJSON(documentJSON);
-
-
-
-            const body = context.document.body;
-            body.load("text");
-            await context.sync();
-
-            const documentContent = body.text;
-            // await insertDebugMessage(`Document content before API call: ${documentContent}`);
-
-            // Step 2: Prepare payload and send API request
-            const payload = {
-                instruction: instruction,
-                document_content: btoa(documentContent), // Encode as Base64
-            };
-
-            // await insertDebugMessage(`Payload sent to API: ${JSON.stringify(payload)}`);
-
-            const response = await axios.post(
-                "https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/process_instruction",
-                payload,
-                { headers: { "Content-Type": "application/json" } }
-            );
-
-            if (response.status !== 200) {
-                throw new Error(`API returned status ${response.status}`);
-            }
-
-            // Step 3: Debug the full API response
-            // await insertDebugMessage(`Raw API response: ${JSON.stringify(response.data)}`);
-
-            // **Correct extraction of changes and updated_document**
-            const updated_document_obj = response.data?.updated_document || {};
-            const changes = updated_document_obj.changes || [];
-            const updated_document = updated_document_obj.updated_document || "";
-
-            // await insertDebugMessage(`Parsed changes: ${JSON.stringify(changes)}`);
-            // await insertDebugMessage(`Parsed updated document type: ${typeof updated_document}`);
-
-            // Validate API response
-            if (!Array.isArray(changes)) {
-                await insertDebugMessage("Error: API did not return an array for 'changes'.");
-                return;
-            }
-
-            if (typeof updated_document !== "string") {
-                await insertDebugMessage("Error: API did not return Base64 string for 'updated_document'.");
-                return;
-            }
-
-            // Step 4: Display proposed changes for review
-            displayProposedChanges(changes);
-
-        } catch (error) {
-            await insertDebugMessage(`Error: ${error.message}`);
-        }
-    });
 }
 
 
@@ -1367,8 +1133,6 @@ async function generateAIChangesWithContext() {
     // await sendDocumentContentToAPI(userPrompt);
     await sendDocumentJSONToAPI(userPrompt);
 }
-
-
 
 
 async function insertDebugMessage(message) {
