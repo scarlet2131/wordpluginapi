@@ -54,13 +54,13 @@ Office.onReady((info) => {
       });
       let userToken = jwtDecode(userTokenEncoded, { complete: true });
     //   jwt.default.decode(token, { complete: true });
-      document.getElementById("userInfo").innerHTML =
-        "name: " +
-        userToken.name +
-        "<br>email: " +
-        userToken.preferred_username +
-        "<br>id: " +
-        userToken.oid;
+    //   document.getElementById("userInfo").innerHTML =
+    //     "name: " +
+    //     userToken.name +
+    //     "<br>email: " +
+    //     userToken.preferred_username +
+    //     "<br>id: " +
+    //     userToken.oid;
       insertDebugMessage(userToken);
       insertDebugMessage(userToken.preferred_username)
 
@@ -84,13 +84,13 @@ Office.onReady((info) => {
        }
 
     } catch (error) {
-      document.getElementById("userInfo").innerHTML =
-        "An error occurred. <br>Name: " +
-        error.name +
-        "<br>Code: " +
-        error.code +
-        "<br>Message: " +
-        error.message;
+    //   document.getElementById("userInfo").innerHTML =
+    //     "An error occurred. <br>Name: " +
+    //     error.name +
+    //     "<br>Code: " +
+    //     error.code +
+    //     "<br>Message: " +
+    //     error.message;
       console.log(error);
     }
   }
