@@ -67,6 +67,7 @@ Office.onReady((info) => {
     //   insertDebugMessage(userToken.preferred_username)
 
       const storedDetails = sessionStorage.getItem('companyDetails');
+
         if (storedDetails) {
         const companyDetails = JSON.parse(storedDetails);
         insertDebugMessage(`Retrieved company details:", ${companyDetails}`);
@@ -77,28 +78,31 @@ Office.onReady((info) => {
         insertDebugMessage(`Retrieved company email:", ${companyDetails.companyName}`);
 
 
+        const email = companyDetails.email;
+        const company = email.split('@')[1].split('.')[0];
+         
+        // 3. Check admin status with backend
+        const { is_admin, config } = await checkAdminStatus(email);
+     //    const isAdmin  = await checkAdminStatus(email);
+        insertDebugMessage(`printingt he admin, ${is_admin}`)
+        
+        // 4. Toggle admin UI
+        const adminSection = document.getElementById('adminSection');
+        adminSection.style.display = is_admin ? 'block' : 'none';
+        
+        // 5. If admin, load company config
+        if (is_admin && config) {
+            document.getElementById('apiKey').value = config.openai_key || '';
+            document.getElementById('onedriveLink').value = config.onedrive_link || '';
+        }
+
+
         // Use companyDetails.email, companyDetails.domain, or companyDetails.companyName as needed.
         }
 
     //    // 2. Extract company name from email
     //    const email = userToken.preferred_username
-       const email = companyDetails.email;
-       const company = email.split('@')[1].split('.')[0];
-        
-       // 3. Check admin status with backend
-       const { is_admin, config } = await checkAdminStatus(email);
-    //    const isAdmin  = await checkAdminStatus(email);
-       insertDebugMessage(`printingt he admin, ${is_admin}`)
-       
-       // 4. Toggle admin UI
-       const adminSection = document.getElementById('adminSection');
-       adminSection.style.display = is_admin ? 'block' : 'none';
-       
-       // 5. If admin, load company config
-       if (is_admin && config) {
-        document.getElementById('apiKey').value = config.openai_key || '';
-        document.getElementById('onedriveLink').value = config.onedrive_link || '';
-       }
+      
 
     } catch (error) {
     //   document.getElementById("userInfo").innerHTML =
