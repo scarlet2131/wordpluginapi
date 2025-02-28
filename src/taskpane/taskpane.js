@@ -69,19 +69,20 @@ Office.onReady((info) => {
        const company = email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
-       const isAdmin  = await checkAdminStatus(email);
+       const { is_admin, config } = await checkAdminStatus(email);
+    //    const isAdmin  = await checkAdminStatus(email);
        insertDebugMessage(`printingt he admin, ${isAdmin}`)
        
        // 4. Toggle admin UI
-       document.getElementById('adminSection').style.display = isAdmin ? 'block' : 'none';
+       const adminSection = document.getElementById('adminSection');
+       adminSection.style.display = is_admin ? 'block' : 'none';
        
        // 5. If admin, load company config
-       if (isAdmin) {
-           const config = await getCompanyConfig(company);
-           document.getElementById('apiKey').value = config.openaiKey || '';
-           document.getElementById('onedriveLink').value = config.onedriveLink || '';
+       if (is_admin && config) {
+        document.getElementById('apiKey').value = config.openai_key || '';
+        document.getElementById('onedriveLink').value = config.onedrive_link || '';
        }
-    
+
     } catch (error) {
       document.getElementById("userInfo").innerHTML =
         "An error occurred. <br>Name: " +
@@ -102,31 +103,31 @@ Office.onReady((info) => {
 }
 
 
-async function getCompanyConfig(company) {
-    try {
-        const response = await axios.get(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/company-config/${company}`);
-        return response.data;
-    } catch (error) {
-        console.error('Config load failed:', error);
-        return {};
-    }
-}
-
+// Update saveConfig to match backend expectations
 async function saveConfig() {
     try {
         const email = jwtDecode(await Office.auth.getAccessToken()).preferred_username;
-        const company = email.split('@')[1].split('.')[0];
+        const domain = email.split('@')[1]; // Match backend's domain extraction
         
-        await axios.post('https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/save-config', {
-            company,
-            openaiKey: document.getElementById('apiKey').value,
-            onedriveLink: document.getElementById('onedriveLink').value
-        });
+        await axios.post(
+            'https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/save-config',
+            {
+                domain, // Send full domain instead of company name
+                openai_key: document.getElementById('apiKey').value,
+                onedrive_link: document.getElementById('onedriveLink').value
+            },
+            {
+                headers: {
+                    "ngrok-skip-browser-warning": "true",
+                    "Content-Type": "application/json"
+                }
+            }
+        );
         
         alert('Settings saved successfully!');
     } catch (error) {
         console.error('Save failed:', error);
-        alert('Failed to save settings');
+        alert(`Failed to save settings: ${error.response?.data?.detail || error.message}`);
     }
 }
 
@@ -150,7 +151,10 @@ async function checkAdminStatus(email) {
     );
         insertDebugMessage(`Admin check result:', ${response.data.is_admin}`);
 
-        return response.data.is_admin;
+        return {
+            is_admin: response.data.is_admin,
+            config: response.data.config
+        };
     } catch (error) {
         insertDebugMessage(`Admin check failed:', ${error}`);
         return { isAdmin: false };
