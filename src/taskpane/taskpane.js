@@ -11,7 +11,6 @@ let currentPlaceholders = {};
 document.getElementById("loadTemplate").addEventListener("click", loadTemplate);
 document.getElementById("applyEditedPlaceholders").addEventListener("click", updatePlaceholders);
 document.getElementById("enableTrackChanges").addEventListener("click", enableTrackChanges);
-document.getElementById("applyRedlines").addEventListener("click", applyRedlines);
 document.getElementById("generateAIChangesWithContext").addEventListener("click", generateAIChangesWithContext);
 
 document.getElementById("disableAllChanges").addEventListener("click", disableAllChanges);
