@@ -75,7 +75,7 @@ Office.onReady((info) => {
 
     //    // 2. Extract company name from email
     //    const email = userToken.preferred_username
-       const email = storedDetails.email;
+       const email = companyDetails.email;
        const company = email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
