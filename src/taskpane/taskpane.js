@@ -34,6 +34,8 @@ Office.onReady((info) => {
         // Attach event listeners
         document.getElementById("docxFileInput").addEventListener("change", handleDocxUpload);
         document.getElementById("applyEditedPlaceholders").addEventListener("click", mergeAndInsertTemplate);
+        storeCompanyDetailsInSession();
+
 
     }
 });
@@ -49,10 +51,10 @@ Office.onReady((info) => {
   
   async function handleAdminFlow() {
     try {
-      let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
-        allowSignInPrompt: true,
-      });
-      let userToken = jwtDecode(userTokenEncoded, { complete: true });
+    //   let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
+    //     allowSignInPrompt: true,
+    //   });
+    //   let userToken = jwtDecode(userTokenEncoded, { complete: true });
     //   jwt.default.decode(token, { complete: true });
     //   document.getElementById("userInfo").innerHTML =
     //     "name: " +
@@ -61,11 +63,19 @@ Office.onReady((info) => {
     //     userToken.preferred_username +
     //     "<br>id: " +
     //     userToken.oid;
-      insertDebugMessage(userToken);
-      insertDebugMessage(userToken.preferred_username)
+    //   insertDebugMessage(userToken);
+    //   insertDebugMessage(userToken.preferred_username)
+
+      const storedDetails = sessionStorage.getItem('companyDetails');
+        if (storedDetails) {
+        const companyDetails = JSON.parse(storedDetails);
+        insertDebugMessage(`Retrieved company details:", ${companyDetails}`);
+        // Use companyDetails.email, companyDetails.domain, or companyDetails.companyName as needed.
+        }
 
     //    // 2. Extract company name from email
-       const email = userToken.preferred_username
+    //    const email = userToken.preferred_username
+       const email = storedDetails.email;
        const company = email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
@@ -96,6 +106,36 @@ Office.onReady((info) => {
   }
   
 
+async function storeCompanyDetailsInSession() {
+    try {
+      // Retrieve the access token from Office and decode it to get user details
+      const token = await Office.auth.getAccessToken();
+      const decodedToken = jwtDecode(token);
+      const email = decodedToken.preferred_username; // e.g. "user@company.onmicrosoft.com"
+  
+      // Extract the domain (everything after the '@')
+      const domain = email.split('@')[1];
+  
+      // Derive a simple company name from the domain (e.g. "company" from "company.onmicrosoft.com")
+      const companyName = domain.split('.')[0];
+  
+      // Create an object with the user and company details
+      const companyDetails = {
+        email,
+        domain,
+        companyName
+      };
+  
+      // Store the details in session storage as a JSON string
+      sessionStorage.setItem('companyDetails', JSON.stringify(companyDetails));
+  
+      console.log("Stored company details in session:", companyDetails);
+    } catch (error) {
+      console.error("Error storing company details in session:", error);
+    }
+}
+
+  
   function getCompanyFromEmail(email) {
     // user@company.domain → "company"
     const domainPart = email.split('@')[1];
