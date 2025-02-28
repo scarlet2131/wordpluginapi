@@ -69,7 +69,7 @@ Office.onReady((info) => {
        const company = email.split('@')[1].split('.')[0];
         
        // 3. Check admin status with backend
-       const { isAdmin } = await checkAdminStatus(email);
+       const isAdmin  = await checkAdminStatus(email);
        insertDebugMessage(`printingt he admin, ${isAdmin}`)
        
        // 4. Toggle admin UI
