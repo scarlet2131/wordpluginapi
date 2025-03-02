@@ -353,6 +353,7 @@ async function extractPlaceholdersFromDocument(context) {
 
         body.load("text"); // Load the text content of the document
         await context.sync();
+        insertDebugMessage("insert if it has recahged this ")
 
         // Regex to find placeholders like {{Placeholder}}
         const placeholderRegex = /\{\{(.*?)\}\}/g;
@@ -492,7 +493,7 @@ async function fetchAndOpenTemplate() {
         });
 
         console.log("✅ Template successfully inserted into Word!");
-        generateEditFields(template.placeholders);
+        (template.placeholders);
 
     } catch (error) {
         console.error("❌ Error fetching template:", error);
