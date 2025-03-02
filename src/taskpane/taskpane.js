@@ -93,7 +93,9 @@ Office.onReady((info) => {
             document.getElementById('apiKey').value = config.openai_key || '';
             document.getElementById('onedriveLink').value = config.onedrive_link || '';
         }else{
-            document.getElementById("debugMessages").innerHTML = "You do not have Admin Permission"
+            const debugContainer = document.getElementById("debugMessages");
+            debugContainer.innerHTML = "You do not have Admin Permission"
+            debugContainer.style.display = "block"; // Show on error
         }
 
 
@@ -568,6 +570,7 @@ async function listTrackedChanges() {
 
         const changesListContainer = document.getElementById("trackedChangesList");
         changesListContainer.innerHTML = "";
+        changesListContainer.style.display = "block"; 
 
         if (trackedChanges.items.length === 0) {
             changesListContainer.innerHTML = "<p>No tracked changes found.</p>";
@@ -1000,14 +1003,24 @@ async function sendDocumentJSONToAPI(instruction) {
                 await insertDebugMessage("Error: Unable to extract document content.");
                 return;
             }
+            
+            const storedDetails = sessionStorage.getItem('companyDetails');
+            
+            if (!storedDetails) {
+                insertDebugMessage("Please login to use this add-in");
+                document.getElementById("userInfo").innerHTML = 
+                    "Please login to use this feature";
+                return; // Stop execution if no company details
+            }
 
-            // Log the JSON for debugging
-            insertDebugMessage("[DEBUG] Document JSON extracted:", documentJSON);
+            const companyDetails = JSON.parse(storedDetails);
+            const company = companyDetails.companyName; // Get company name
 
             // Step 2: Prepare the payload
             const payload = {
                 instruction: instruction,
-                document_content: documentJSON, // Send raw JSON, not stringified
+                document_content: documentJSON, 
+                companyName : company// Send raw JSON, not stringified
             };
 
             // Log the payload for testing
@@ -1050,7 +1063,7 @@ async function sendDocumentJSONToAPI(instruction) {
 async function displayProposedChanges(changes) {
     const container = document.getElementById("proposedChangesContainer");
     container.innerHTML = ""; // Clear previous content
-
+    container.style.display = "block";
     if (!Array.isArray(changes) || changes.length === 0) {
         container.innerHTML = "<p>No changes detected.</p>";
         await insertDebugMessage("No changes detected by the API.");
