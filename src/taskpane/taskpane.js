@@ -1064,6 +1064,7 @@ async function displayProposedChanges(changes) {
     const container = document.getElementById("proposedChangesContainer");
     container.innerHTML = ""; // Clear previous content
     container.style.display = "block";
+    
     if (!Array.isArray(changes) || changes.length === 0) {
         container.innerHTML = "<p>No changes detected.</p>";
         await insertDebugMessage("No changes detected by the API.");
