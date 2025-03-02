@@ -94,8 +94,8 @@ Office.onReady((info) => {
             document.getElementById('onedriveLink').value = config.onedrive_link || '';
         }else{
             const debugContainer = document.getElementById("debugMessages");
+            debugContainer.style.display = 'block'; // Show on error
             debugContainer.innerHTML = "You do not have Admin Permission"
-            debugContainer.style.display = "block"; // Show on error
         }
 
 
@@ -108,7 +108,11 @@ Office.onReady((info) => {
 
     } catch (error) {
     //   console.log(error);
-      document.getElementById("debugMessages").innerHTML = error
+    //   document.getElementById("debugMessages").innerHTML = error;
+    //   debugContainer.style.display = 'block';
+        const debugContainer = document.getElementById("debugMessages");
+        debugContainer.style.display = 'block'; // Show on error
+        debugContainer.innerHTML = "You do not have Admin Permission"
 
     }
   }
@@ -570,7 +574,7 @@ async function listTrackedChanges() {
 
         const changesListContainer = document.getElementById("trackedChangesList");
         changesListContainer.innerHTML = "";
-        changesListContainer.style.display = "block"; 
+        changesListContainer.style.display = 'block'; 
 
         if (trackedChanges.items.length === 0) {
             changesListContainer.innerHTML = "<p>No tracked changes found.</p>";
@@ -1062,9 +1066,9 @@ async function sendDocumentJSONToAPI(instruction) {
 
 async function displayProposedChanges(changes) {
     const container = document.getElementById("proposedChangesContainer");
+    container.style.display = 'block';
     container.innerHTML = ""; // Clear previous content
-    container.style.display = "block";
-    
+
     if (!Array.isArray(changes) || changes.length === 0) {
         container.innerHTML = "<p>No changes detected.</p>";
         await insertDebugMessage("No changes detected by the API.");

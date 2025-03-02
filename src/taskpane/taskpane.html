@@ -30,7 +30,7 @@
       <button id="getIDToken">Login as Admin</button>
 
       <!-- Debug Messages Container -->
-      <div id="debugMessages" class="debug-container"></div>
+      <div id="debugMessages" class="debug-container" style="display: none;"></div>
 
       <!-- Admin Settings Section -->
       <section id="adminSection" class="admin-section" style="display: none;">
@@ -92,10 +92,9 @@
       <!-- Review Changes Section -->
       <section class="review-changes-section">
         <h2>Review Changes</h2>
-        <div id="trackedChangesList" class="change-list">
-          <!-- Tracked changes will be listed dynamically here -->
-        </div>
-        <div id="proposedChangesContainer" class="proposed-changes"></div>
+        <!-- Tracked changes will be listed dynamically here -->
+        <div id="trackedChangesList" class="change-list" style="display: none;"> </div>
+        <div id="proposedChangesContainer" class="proposed-changes" style="display: none;"></div>
         <div class="button-group">
           <button id="listTrackedChanges" class="button">List Tracked Changes</button>
           <button id="acceptSelectedChanges" class="button">Accept Selected</button>
