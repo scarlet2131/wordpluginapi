@@ -541,7 +541,7 @@ async function fetchAndOpenTemplate() {
         (template.placeholders);
 
     } catch (error) {
-        console.error("❌ Error fetching template:", error);
+        insertDebugMessage(`❌ Error fetching template:", ${error}`);
     }
 }
 
