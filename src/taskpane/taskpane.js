@@ -237,6 +237,7 @@ function handleDocxUpload(event) {
 function generateEditFields(placeholders) {
     const container = document.getElementById("editPlaceholderFields");
     container.innerHTML = ""; // Clear previous fields
+    container.style.display = 'block';
     if (!placeholders.length) {
         container.innerHTML = "<p>No placeholders found.</p>";
         return;
