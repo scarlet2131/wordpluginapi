@@ -1,182 +1,138 @@
-/* Modern CSS Redesign */
+/* Enhanced CSS with Button Improvements */
 :root {
-    --primary: #2563eb;       /* Modern blue */
-    --secondary: #10b981;     /* Fresh green */
-    --accent: #f59e0b;        /* Warm orange */
-    --danger: #ef4444;        /* Alert red */
-    --background: #f8fafc;    /* Light background */
-    --text: #1e293b;          /* Dark text */
-    --border: #e2e8f0;        /* Subtle borders */
-    --radius: 8px;            /* Consistent rounding */
+    --primary: #6366f1;       /* Indigo */
+    --secondary: #10b981;     /* Emerald */
+    --accent: #f59e0b;        /* Amber */
+    --danger: #ef4444;        /* Red */
+    --background: #f8fafc;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --radius: 8px;
   }
   
-  /* Base Styles */
-  body {
-    background: var(--background);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    line-height: 1.6;
-  }
-  
-  /* Header */
-  .header {
-    text-align: center;
-    padding: 2rem 1rem;
+  /* Login Button Special Styling */
+  #getIDToken {
     background: var(--primary);
     color: white;
-    margin-bottom: 2rem;
-  }
-  
-  .header img {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-  }
-  
-  .header h1 {
-    font-size: 1.8rem;
-    margin: 1rem 0 0;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    border: none;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
   
-  /* Main Content */
-  .main-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
+  #getIDToken:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
   }
   
-  /* Sections */
+  /* AI Redlining Section Improvements */
+  .ai-redlining-section .button-group {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  
+  #generateAIChangesWithContext {
+    grid-column: 1 / -1;
+    background: var(--secondary);
+  }
+  
+  #enableTrackChanges {
+    background: var(--primary);
+  }
+  
+  #disableAllChanges {
+    background: var(--danger);
+  }
+  
+  /* Review Changes Section Layout */
+  .review-changes-section .button-group {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  
+  #acceptAllChanges, #rejectAllChanges {
+    grid-column: span 2;
+  }
+  
+  /* Card-like Sections */
   section {
     background: white;
     border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
   }
   
-  h2 {
-    color: var(--primary);
-    font-size: 1.25rem;
-    margin: 0 0 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--border);
-  }
-  
-  /* Buttons */
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin: 0.25rem;
-  }
-  
-  .button.primary-button {
-    background: var(--primary);
-    color: white;
-  }
-  
-  .button.secondary-button {
-    background: var(--secondary);
-    color: white;
-  }
-  
-  .button.danger-button {
-    background: var(--danger);
-    color: white;
-  }
-  
-  .button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  /* Form Elements */
-  .input-field {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    margin: 0.5rem 0 1rem;
-    transition: border-color 0.2s ease;
-  }
-  
-  .input-field:focus {
-    border-color: var(--primary);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-  }
-  
-  /* Template Actions */
-  .template-actions {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* Input Group Styling */
+  .input-group {
     margin-bottom: 1.5rem;
   }
   
-  #templatesDropdown {
-    grid-column: 1 / -1;
+  .input-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text);
   }
   
-  /* File Upload */
+  /* Template Actions Grid */
+  .template-actions {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+  }
+  
+  /* File Upload Styling */
   .template-upload-section {
     position: relative;
     border: 2px dashed var(--border);
     border-radius: var(--radius);
-    padding: 1.5rem;
+    padding: 2rem;
     text-align: center;
   }
   
-  #docxFileInput {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-  }
-  
-  #uploadStatus {
-    margin: 1rem 0 0;
-    color: var(--secondary);
-  }
-  
-  /* AI Redlining */
-  .ai-redlining-section .button-group {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-  
-  /* Review Changes */
-  .review-changes-section .button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  
-  /* Debug Messages */
-  .debug-container {
-    background: #fff;
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin: 1rem 0;
-    font-family: monospace;
-    font-size: 0.9rem;
-  }
-  
-  /* Admin Section */
-  .admin-section {
-    background: #fff;
-    border-radius: var(--radius);
+  /* Footer Styling */
+  .footer {
+    text-align: center;
     padding: 1.5rem;
-    margin: 1rem 0;
+    color: #64748b;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
   }
+  
+  /* Button Consistency */
+  .button {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .button:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+  
+  .primary-button { background: var(--primary); color: white; }
+  .secondary-button { background: var(--secondary); color: white; }
+  .danger-button { background: var(--danger); color: white; }
