@@ -49,40 +49,19 @@ Office.onReady((info) => {
   
   async function handleAdminFlow() {
     try {
-    //   let userTokenEncoded = await OfficeRuntime.auth.getAccessToken({
-    //     allowSignInPrompt: true,
-    //   });
-    //   let userToken = jwtDecode(userTokenEncoded, { complete: true });
-    //   jwt.default.decode(token, { complete: true });
-    //   document.getElementById("userInfo").innerHTML =
-    //     "name: " +
-    //     userToken.name +
-    //     "<br>email: " +
-    //     userToken.preferred_username +
-    //     "<br>id: " +
-    //     userToken.oid;
-    //   insertDebugMessage(userToken);
-    //   insertDebugMessage(userToken.preferred_username)
+    
 
       const storedDetails = sessionStorage.getItem('companyDetails');
 
         if (storedDetails) {
         const companyDetails = JSON.parse(storedDetails);
-        insertDebugMessage(`Retrieved company details:", ${companyDetails}`);
-        insertDebugMessage(`Retrieved company email:", ${companyDetails.email}`);
-      
-        insertDebugMessage(`Retrieved company name:", ${companyDetails.domain}`);
-
-        insertDebugMessage(`Retrieved company email:", ${companyDetails.companyName}`);
-
+    
 
         const email = companyDetails.email;
         const company = email.split('@')[1].split('.')[0];
          
         // 3. Check admin status with backend
         const { is_admin, config } = await checkAdminStatus(email);
-     //    const isAdmin  = await checkAdminStatus(email);
-        insertDebugMessage(`printingt he admin, ${is_admin}`)
         
         // 4. Toggle admin UI
         const adminSection = document.getElementById('adminSection');
@@ -99,17 +78,9 @@ Office.onReady((info) => {
         }
 
 
-        // Use companyDetails.email, companyDetails.domain, or companyDetails.companyName as needed.
         }
 
-    //    // 2. Extract company name from email
-    //    const email = userToken.preferred_username
-      
-
     } catch (error) {
-    //   console.log(error);
-    //   document.getElementById("debugMessages").innerHTML = error;
-    //   debugContainer.style.display = 'block';
         const debugContainer = document.getElementById("debugMessages");
         debugContainer.style.display = 'block'; // Show on error
         debugContainer.innerHTML = "You do not have Admin Permission"
@@ -201,14 +172,12 @@ async function checkAdminStatus(email) {
             }
         }
     );
-        insertDebugMessage(`Admin check result:', ${response.data.is_admin}`);
 
         return {
             is_admin: response.data.is_admin,
             config: response.data.config
         };
     } catch (error) {
-        insertDebugMessage(`Admin check failed:', ${error}`);
         return { isAdmin: false };
     }
 }
@@ -243,7 +212,6 @@ function handleDocxUpload(event) {
 
                 // Extract placeholders from the document
                 const placeholders = await extractPlaceholdersFromDocument(context);
-                insertDebugMessage("Extracted placeholders: " + JSON.stringify(placeholders));
 
                 // Generate dynamic form fields for the placeholders
                 generateEditFields(placeholders);
@@ -299,7 +267,6 @@ async function mergeAndInsertTemplate() {
         await Word.run(async (context) => {
             // Extract placeholders from the document
             const placeholders = await extractPlaceholdersFromDocument(context);
-            insertDebugMessage("Extracted placeholders: " + JSON.stringify(placeholders));
 
             // Gather user input values for each placeholder
             const data = {};
@@ -307,7 +274,6 @@ async function mergeAndInsertTemplate() {
                 const input = document.getElementById(`placeholder-${ph}`);
                 data[ph] = input ? input.value : "";
             });
-            insertDebugMessage("User data: " + JSON.stringify(data));
 
             // Iterate through sections (headers, body, and footers)
             const sections = context.document.sections;
@@ -340,11 +306,9 @@ async function mergeAndInsertTemplate() {
             }
 
             await context.sync();
-            insertDebugMessage("Placeholders updated successfully!");
         });
     } catch (error) {
         console.error("Error during merge and render:", error);
-        insertDebugMessage("Error during merge: " + error.message);
     }
 }
 
@@ -353,13 +317,11 @@ async function extractPlaceholdersFromDocument(context) {
     try {
         const body = context.document.body;
         if (!body) {
-            insertDebugMessage("Error: context.document.body is undefined in extractPlaceholdersFromDocument.");
             return [];
         }
 
         body.load("text"); // Load the text content of the document
         await context.sync();
-        insertDebugMessage("insert if it has recahged this ")
 
         // Regex to find placeholders like {{Placeholder}}
         const placeholderRegex = /\{\{(.*?)\}\}/g;
@@ -374,7 +336,6 @@ async function extractPlaceholdersFromDocument(context) {
         return uniquePlaceholders.map((ph) => ph.replace(/\{\{|\}\}/g, ""));
     } catch (error) {
         console.error("Error in extractPlaceholdersFromDocument:", error);
-        insertDebugMessage("Error in extractPlaceholdersFromDocument: " + error.message);
         return [];
     }
 }
@@ -406,45 +367,12 @@ Office.onReady((info) => {
 });
 
 
-// async function loadTemplate() {
-//     const templateKey = document.getElementById("templateSelector").value;
-//     const template = templates[templateKey];
-
-//     await Word.run(async (context) => {
-//         const sections = context.document.sections;
-//         sections.load("items");
-//         await context.sync();
-
-//         sections.items.forEach((section) => {
-//             const header = section.getHeader("Primary");
-//             header.clear();
-//             header.insertText(template.header, Word.InsertLocation.replace);
-
-//             const body = section.body;
-//             body.clear();
-//             body.insertText(template.body, Word.InsertLocation.start);
-
-//             const footer = section.getFooter("Primary");
-//             footer.clear();
-//             footer.insertText(template.footer, Word.InsertLocation.replace);
-//         });
-
-//         await context.sync();
-//     });
-
-//     generateEditFields(template.placeholders);
-// }
-
-
-
-
 async function getTemplatesAndPopulateDropdown() {
     try {
 
         const storedDetails = sessionStorage.getItem('companyDetails');
             
         if (!storedDetails) {
-            insertDebugMessage("Please login to use this add-in");
             document.getElementById("userInfo").innerHTML = 
                 "Please login to use this feature";
             return; // Stop execution if no company details
@@ -459,7 +387,6 @@ async function getTemplatesAndPopulateDropdown() {
         };
 
         // Step 1: Fetch data from the backend endpoint with Axios
-        //   const response = await axios.get("https://bca5-142-126-182-191.ngrok-free.app/api/templates");
 
         const response = await axios.post("https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates",payload, {
             headers: {
@@ -467,7 +394,6 @@ async function getTemplatesAndPopulateDropdown() {
             }
         });
   
-      await insertDebugMessage(` please print thus repsosnise ${JSON.stringify(response)}`);
       // Step 2: Parse the JSON response (Axios auto-parses JSON by default)
       const templates = response.data.templates || [];
   
@@ -480,7 +406,6 @@ async function getTemplatesAndPopulateDropdown() {
         option.textContent = tpl.name;
         dropdown.appendChild(option);
       });
-    //   await insertDebugMessage(` lets print the dorpdown ${dropdown}`);
       console.log("Successfully populated the templates dropdown!");
     } catch (error) {
       console.error("Error fetching templates:", error);
@@ -499,7 +424,6 @@ async function fetchAndOpenTemplate() {
         const storedDetails = sessionStorage.getItem('companyDetails');
             
         if (!storedDetails) {
-            insertDebugMessage("Please login to use this add-in");
             document.getElementById("userInfo").innerHTML = 
                 "Please login to use this feature";
             return; // Stop execution if no company details
@@ -522,12 +446,10 @@ async function fetchAndOpenTemplate() {
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
 
-        insertDebugMessage(`Template file received from API:", ${response}`);
 
         // Step 2: Convert ArrayBuffer to Base64
         const base64Data = arrayBufferToBase64(response.data);
 
-        insertDebugMessage("Converted file to Base64, attempting to insert into Word...");
 
         // Step 3: Insert into Word
         await Word.run(async (context) => {
@@ -539,17 +461,15 @@ async function fetchAndOpenTemplate() {
 
              // Extract placeholders from the document
              const placeholders = await extractPlaceholdersFromDocument(context);
-             insertDebugMessage("Extracted placeholders: " + JSON.stringify(placeholders));
 
              // Generate dynamic form fields for the placeholders
              generateEditFields(placeholders);
         });
 
-        insertDebugMessage("✅ Template successfully inserted into Word!");
         // generateEditFields(response.data.placeholder);
 
     } catch (error) {
-        insertDebugMessage(`❌ Error fetching template:", ${error}`);
+        console.log(`❌ Error fetching template:", ${error}`);
     }
 }
 
@@ -894,7 +814,6 @@ async function applyReplace(change) {
             // Step 3: Validate paragraph index
             const paragraphIndex = change.paragraph_index - 1; // Convert 1-based index to 0-based
             if (paragraphIndex < 0 || paragraphIndex >= paragraphs.items.length) {
-                await insertDebugMessage(`Error: Paragraph index ${change.paragraph_index} out of range.`);
                 return;
             }
 
@@ -909,50 +828,34 @@ async function applyReplace(change) {
             const normalizedOriginalText = change.original_text.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
 
             // Debugging: Log normalized values
-            // await insertDebugMessage(
             //     `Normalized paragraphText: '${normalizedParagraphText}', normalizedOriginalText: '${normalizedOriginalText}'`
             // );
             const trimmedUpdatedText = change.updated_text.trim().replace(/\r?\n|\r/g, "");
 
             // Step 5: Check for the presence of original text
             if (!normalizedParagraphText.includes(normalizedOriginalText)) {
-                await insertDebugMessage(
-                    `Error: Normalized original text '${normalizedOriginalText}' not found in paragraph ${change.paragraph_index}.`
-                );
                 return;
             }
 
             // Step 6: Perform the replacement using raw paragraphText
             const updatedParagraphText = paragraphText.replace(normalizedOriginalText, trimmedUpdatedText);
 
-            // Debugging: Log the updated text
-            // await insertDebugMessage(`Updated Paragraph Text: '${updatedParagraphText}'`);
-
             // Step 7: Update the paragraph with the replaced text
             targetParagraph.clear(); // Clear the current paragraph content
             targetParagraph.insertText(updatedParagraphText, Word.InsertLocation.replace); // Replace with updated text
             await context.sync();
 
-            // Step 8: Log success
-            // await insertDebugMessage(
-            //     `Applied change_id ${change.change_id}: Replaced '${change.original_text}' with '${change.updated_text}' in paragraph ${change.paragraph_index}.`
-            // );
         } catch (error) {
             // Step 9: Log any errors
-            await insertDebugMessage(`Error applying replace for change_id ${change.change_id}: ${error.message}`);
+            console.log(`Error applying replace for change_id ${change.change_id}: ${error.message}`);
         }
     });
 }
 
 
 async function applyAddOrUpdate(change) {
-
-    // await insertDebugMessage(`reacged the apply or update method `);
-
     await Word.run(async (context) => {
         try {
-            // Step 1: Log the change object
-            // console.log("Change object received:", change);
 
             // Step 2: Enable track changes
             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
@@ -963,15 +866,11 @@ async function applyAddOrUpdate(change) {
             paragraphs.load("items");
             await context.sync();
 
-            // await insertDebugMessage("Total paragraphs in the document:", paragraphs.items.length);
-
             // Step 4: Validate text and determine action
             const textToApply = change.inserted_text || change.updated_text || change.content;
             if (!textToApply) {
                 throw new Error(`No valid text provided for change_id ${change.change_id}.`);
             }
-
-            // console.log("Text to insert or update:", textToApply);
 
             if (change.action === "add") {
                 // Step 5: Handle adding content
@@ -1038,7 +937,7 @@ async function applyChange(change) {
     } else if (change.action === "add" || change.action === "update") {
         await applyAddOrUpdate(change);
     } else {
-        await insertDebugMessage(`Error: Unsupported action '${change.action}' for change_id ${change.change_id}.`);
+        console.log(`Error: Unsupported action '${change.action}' for change_id ${change.change_id}.`);
     }
 }
 
@@ -1051,14 +950,12 @@ async function sendDocumentJSONToAPI(instruction) {
 
             if (!documentJSON || Object.keys(documentJSON).length === 0) {
                 console.error("[DEBUG] No document content extracted or JSON is empty.");
-                await insertDebugMessage("Error: Unable to extract document content.");
                 return;
             }
             
             const storedDetails = sessionStorage.getItem('companyDetails');
             
             if (!storedDetails) {
-                insertDebugMessage("Please login to use this add-in");
                 document.getElementById("userInfo").innerHTML = 
                     "Please login to use this feature";
                 return; // Stop execution if no company details
@@ -1089,14 +986,11 @@ async function sendDocumentJSONToAPI(instruction) {
                 throw new Error(`API returned status ${response.status}`);
             } 
             
-            // await insertDebugMessage(`Raw API response: ${JSON.stringify(response.data)}`);
-
              // Access and validate changes
             const changesArray = response.data?.changes; // Access changes from API response
 
             // Ensure changesArray is an array
             if (!Array.isArray(changesArray)) {
-                await insertDebugMessage(`Error: 'changes' is not an array. Found type: ${typeof changesArray}`);
                 return;
             }
 
@@ -1105,7 +999,6 @@ async function sendDocumentJSONToAPI(instruction) {
 
         } catch (error) {
             console.error("[DEBUG] Error in sendDocumentJSONToAPI:", error);
-            await insertDebugMessage(`Error: ${error.message}`);
         }
     });
 }
@@ -1118,7 +1011,6 @@ async function displayProposedChanges(changes) {
 
     if (!Array.isArray(changes) || changes.length === 0) {
         container.innerHTML = "<p>No changes detected.</p>";
-        await insertDebugMessage("No changes detected by the API.");
         return;
     }
 
@@ -1130,7 +1022,7 @@ async function displayProposedChanges(changes) {
 
         if (change.action === "replace") {
             if (!change.original_text || !change.updated_text) {
-                insertDebugMessage(`Error: Missing data for replace change_id ${change.change_id}.`);
+                console.log(`Error: Missing data for replace change_id ${change.change_id}.`);
                 return;
             }
 
@@ -1144,7 +1036,7 @@ async function displayProposedChanges(changes) {
         } 
         else if (change.action === "add" || change.action === "update") {
             if (!change.inserted_text && !change.updated_text) {
-                insertDebugMessage(`Error: Missing inserted_text or updated_text for change_id ${change.change_id}.`);
+                console.log(`Error: Missing inserted_text or updated_text for change_id ${change.change_id}.`);
                 return;
             }
 
@@ -1157,11 +1049,9 @@ async function displayProposedChanges(changes) {
             changeItem.appendChild(proposed);
         } 
         else {
-            insertDebugMessage(`Error: Unknown action monisha 1 '${change.action}' for change_id ${change.change_id}.`);
+            console.log(`Error: Unknown action monisha 1 '${change.action}' for change_id ${change.change_id}.`);
             return;
         }
-
-        // insertDebugMessage(`going before `);
 
         // Create Accept/Reject buttons
         const acceptButton = document.createElement("button");
@@ -1171,15 +1061,13 @@ async function displayProposedChanges(changes) {
 
         const rejectButton = document.createElement("button");
         rejectButton.textContent = "Reject";
-        rejectButton.onclick = () => insertDebugMessage(`Rejected change_id ${change.change_id}`);
+        rejectButton.onclick = () => console.log(`Rejected change_id ${change.change_id}`);
 
 
         changeItem.appendChild(acceptButton);
         changeItem.appendChild(rejectButton);
         container.appendChild(changeItem);
     });
-
-    // await insertDebugMessage(`Preparing to display ${changes.length} proposed changes.`);
 }
 
 
@@ -1188,14 +1076,10 @@ async function generateAIChangesWithContext() {
     const userPrompt = document.getElementById("aiPromptInput").value;
     if (!userPrompt) {
         console.error("No prompt provided.");
-        // await insertDebugMessage("No prompt provided for AI generation.");
         return;
     }
-    insertDebugMessage("does it reach here first of all ")
-    // await insertDebugMessage(`Button clicked. Starting AI generation with prompt: ${userPrompt}`);
 
     // Call the function to send the document content and process it
-    // await sendDocumentContentToAPI(userPrompt);
     await sendDocumentJSONToAPI(userPrompt);
 }
 
