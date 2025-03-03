@@ -148,7 +148,11 @@
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
-  
+  #getIDToken{
+    align-content: center;
+    align-items: center;
+    border-radius: var(var(--radius));
+  }
   /* ===============================
      Template Actions & Upload
   =============================== */
