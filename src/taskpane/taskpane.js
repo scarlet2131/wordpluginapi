@@ -522,12 +522,12 @@ async function fetchAndOpenTemplate() {
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
 
-        console.log("Template file received from API:", response);
+        insertDebugMessage(`Template file received from API:", ${response}`);
 
         // Step 2: Convert ArrayBuffer to Base64
         const base64Data = arrayBufferToBase64(response.data);
 
-        console.log("Converted file to Base64, attempting to insert into Word...");
+        insertDebugMessage("Converted file to Base64, attempting to insert into Word...");
 
         // Step 3: Insert into Word
         await Word.run(async (context) => {
@@ -537,7 +537,7 @@ async function fetchAndOpenTemplate() {
             await context.sync();
         });
 
-        console.log("✅ Template successfully inserted into Word!");
+        insertDebugMessage("✅ Template successfully inserted into Word!");
         (template.placeholders);
 
     } catch (error) {
