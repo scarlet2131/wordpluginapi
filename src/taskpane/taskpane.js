@@ -435,16 +435,37 @@ Office.onReady((info) => {
 //     generateEditFields(template.placeholders);
 // }
 
+
+
+
 async function getTemplatesAndPopulateDropdown() {
     try {
-      // Step 1: Fetch data from the backend endpoint with Axios
-    //   const response = await axios.get("https://bca5-142-126-182-191.ngrok-free.app/api/templates");
 
-    const response = await axios.get("https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates", {
-        headers: {
-          "ngrok-skip-browser-warning": "true"
+        const storedDetails = sessionStorage.getItem('companyDetails');
+            
+        if (!storedDetails) {
+            insertDebugMessage("Please login to use this add-in");
+            document.getElementById("userInfo").innerHTML = 
+                "Please login to use this feature";
+            return; // Stop execution if no company details
         }
-      });
+
+        const companyDetails = JSON.parse(storedDetails);
+        const company = companyDetails.companyName; // Get company name
+
+        // Step 2: Prepare the payload
+        const payload = {
+            companyName : company// Send raw JSON, not stringified
+        };
+
+        // Step 1: Fetch data from the backend endpoint with Axios
+        //   const response = await axios.get("https://bca5-142-126-182-191.ngrok-free.app/api/templates");
+
+        const response = await axios.post("https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates",payload, {
+            headers: {
+            "ngrok-skip-browser-warning": "true"
+            }
+        });
   
       await insertDebugMessage(` please print thus repsosnise ${JSON.stringify(response)}`);
       // Step 2: Parse the JSON response (Axios auto-parses JSON by default)
@@ -475,10 +496,28 @@ async function fetchAndOpenTemplate() {
             return;
         }
 
+        const storedDetails = sessionStorage.getItem('companyDetails');
+            
+        if (!storedDetails) {
+            insertDebugMessage("Please login to use this add-in");
+            document.getElementById("userInfo").innerHTML = 
+                "Please login to use this feature";
+            return; // Stop execution if no company details
+        }
+
+        const companyDetails = JSON.parse(storedDetails);
+        const company = companyDetails.companyName; // Get company name
+
+        // Step 2: Prepare the payload
+        const payload = {
+            companyName : company// Send raw JSON, not stringified
+        };
+
+
         console.log(`Fetching template with ID: ${selectedTemplateId}`);
 
         // Step 1: Fetch the .docx file from backend
-        const response = await axios.get(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates/${selectedTemplateId}`, {
+        const response = await axios.post(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates/${selectedTemplateId}`, payload, {
             headers: { "ngrok-skip-browser-warning": "true" },
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
