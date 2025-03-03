@@ -525,7 +525,6 @@ async function fetchAndOpenTemplate() {
         insertDebugMessage(`Template file received from API:", ${response}`);
 
         // Step 2: Convert ArrayBuffer to Base64
-        const { fileData, placeholders } = response.data;
         const base64Data = arrayBufferToBase64(response.data);
 
         insertDebugMessage("Converted file to Base64, attempting to insert into Word...");
@@ -539,7 +538,7 @@ async function fetchAndOpenTemplate() {
         });
 
         insertDebugMessage("✅ Template successfully inserted into Word!");
-        generateEditFields(placeholders);
+        generateEditFields(response.data.placeholder);
 
     } catch (error) {
         insertDebugMessage(`❌ Error fetching template:", ${error}`);
