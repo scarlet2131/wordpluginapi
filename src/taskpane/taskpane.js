@@ -535,10 +535,18 @@ async function fetchAndOpenTemplate() {
             body.clear();
             body.insertFileFromBase64(base64Data, Word.InsertLocation.start);
             await context.sync();
+
+
+             // Extract placeholders from the document
+             const placeholders = await extractPlaceholdersFromDocument(context);
+             insertDebugMessage("Extracted placeholders: " + JSON.stringify(placeholders));
+
+             // Generate dynamic form fields for the placeholders
+             generateEditFields(placeholders);
         });
 
         insertDebugMessage("✅ Template successfully inserted into Word!");
-        generateEditFields(response.data.placeholder);
+        // generateEditFields(response.data.placeholder);
 
     } catch (error) {
         insertDebugMessage(`❌ Error fetching template:", ${error}`);
