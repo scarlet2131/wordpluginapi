@@ -538,7 +538,7 @@ async function fetchAndOpenTemplate() {
         });
 
         insertDebugMessage("✅ Template successfully inserted into Word!");
-        (template.placeholders);
+        generateEditFields(template.placeholders);
 
     } catch (error) {
         insertDebugMessage(`❌ Error fetching template:", ${error}`);
