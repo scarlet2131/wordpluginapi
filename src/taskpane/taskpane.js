@@ -133,7 +133,7 @@ async function saveConfig() {
         const domain = email.split('@')[1]; // Match backend's domain extraction
         
         await axios.post(
-            'https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/save-config',
+            ' https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/api/save-config',
             {
                 domain, // Send full domain instead of company name
                 openai_key: document.getElementById('apiKey').value,
@@ -164,7 +164,7 @@ async function saveConfig() {
 // Simplified backend calls
 async function checkAdminStatus(email) {
     try {
-        const response = await axios.post('https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/check-admin', 
+        const response = await axios.post(' https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/api/check-admin', 
         { email },
         { headers:
             { "ngrok-skip-browser-warning": "true",
@@ -389,12 +389,12 @@ async function getTemplatesAndPopulateDropdown() {
 
         // Step 1: Fetch data from the backend endpoint with Axios
 
-        const response = await axios.post("https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates",payload, {
+        const response = await axios.post("https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/api/templates",payload, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
         });
-  
+   
       // Step 2: Parse the JSON response (Axios auto-parses JSON by default)
       const templates = response.data.templates || [];
   
@@ -442,7 +442,7 @@ async function fetchAndOpenTemplate() {
         console.log(`Fetching template with ID: ${selectedTemplateId}`);
 
         // Step 1: Fetch the .docx file from backend
-        const response = await axios.post(`https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/api/templates/${selectedTemplateId}`, payload, {
+        const response = await axios.post(` https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/${selectedTemplateId}`, payload, {
             headers: { "ngrok-skip-browser-warning": "true" },
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
@@ -977,7 +977,7 @@ async function sendDocumentJSONToAPI(instruction) {
 
             // Step 3: Send to API
             const response = await axios.post(
-                "https://a169-2607-fea8-fc01-7009-d074-5ac-b353-5829.ngrok-free.app/process_json",
+                " https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/process_json",
                 payload,
                 { headers: { "Content-Type": "application/json" } }
             );
