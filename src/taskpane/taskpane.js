@@ -442,7 +442,7 @@ async function fetchAndOpenTemplate() {
         console.log(`Fetching template with ID: ${selectedTemplateId}`);
 
         // Step 1: Fetch the .docx file from backend
-        const response = await axios.post(` https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/${selectedTemplateId}`, payload, {
+        const response = await axios.post(`https://4634-2607-fea8-fc01-7009-2cf6-ef6-4e16-bc36.ngrok-free.app/api/templates/${selectedTemplateId}`, payload, {
             headers: { "ngrok-skip-browser-warning": "true" },
             responseType: "arraybuffer" // ⚠️ Change response type to arraybuffer
         });
