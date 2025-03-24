@@ -374,19 +374,68 @@ function generateEditFields(placeholders) {
 //     }
 // }
 // Function to replace placeholders in the document with user input
+// async function mergeAndInsertTemplate() {
+//     try {
+//         await Word.run(async (context) => {
+//             // Extract placeholders from the document
+//             const placeholders = await extractPlaceholdersFromDocument(context);
+
+//             // Use values from currentPlaceholders (built via dropdown + input)
+//             const data = {};
+//             placeholders.forEach(ph => {
+//                 data[ph] = currentPlaceholders[ph] || "";
+//             });
+
+//             // Load document sections
+//             const sections = context.document.sections;
+//             sections.load("items");
+//             await context.sync();
+
+//             for (const section of sections.items) {
+//                 const parts = [
+//                     section.getHeader("Primary"),
+//                     section.body,
+//                     section.getFooter("Primary"),
+//                 ];
+
+//                 for (const part of parts) {
+//                     part.load("text");
+//                     await context.sync();
+
+//                     let content = part.text || "";
+
+//                     // Replace placeholders with user input
+//                     for (let key in data) {
+//                         const regex = new RegExp(`{{${key}}}`, "g");
+//                         content = content.replace(regex, data[key]);
+//                     }
+
+//                     // Clear the content and insert updated text
+//                     part.clear();
+//                     part.insertText(content, Word.InsertLocation.replace);
+//                 }
+//             }
+
+//             await context.sync();
+//             console.log("Template merged and placeholders replaced.");
+//         });
+//     } catch (error) {
+//         console.error("Error during merge and render:", error);
+//     }
+// }
+
+
 async function mergeAndInsertTemplate() {
     try {
         await Word.run(async (context) => {
-            // Extract placeholders from the document
-            const placeholders = await extractPlaceholdersFromDocument(context);
+            // Get edited placeholders only
+            const editedKeys = Object.keys(currentPlaceholders);
 
-            // Use values from currentPlaceholders (built via dropdown + input)
-            const data = {};
-            placeholders.forEach(ph => {
-                data[ph] = currentPlaceholders[ph] || "";
-            });
+            if (editedKeys.length === 0) {
+                console.warn("No placeholders were edited.");
+                return;
+            }
 
-            // Load document sections
             const sections = context.document.sections;
             sections.load("items");
             await context.sync();
@@ -404,23 +453,23 @@ async function mergeAndInsertTemplate() {
 
                     let content = part.text || "";
 
-                    // Replace placeholders with user input
-                    for (let key in data) {
+                    // Only replace edited placeholders
+                    for (let key of editedKeys) {
                         const regex = new RegExp(`{{${key}}}`, "g");
-                        content = content.replace(regex, data[key]);
+                        content = content.replace(regex, currentPlaceholders[key]);
                     }
 
-                    // Clear the content and insert updated text
+                    // Clear the part and reinsert updated content
                     part.clear();
                     part.insertText(content, Word.InsertLocation.replace);
                 }
             }
 
             await context.sync();
-            console.log("Template merged and placeholders replaced.");
+            console.log("Only edited placeholders were merged into the document.");
         });
     } catch (error) {
-        console.error("Error during merge and render:", error);
+        console.error("Error during merge and insert:", error);
     }
 }
 
