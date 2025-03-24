@@ -1042,15 +1042,17 @@ function displayExtractedJSON(jsonData) {
 async function applyReplace(change) {
     await Word.run(async (context) => {
         try {
+            // Enable track changes
             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
+            await context.sync();
 
             const paragraphs = context.document.body.paragraphs;
             paragraphs.load("items");
             await context.sync();
 
-            const paraIndex = change.paragraph_index - 1; // 1-based to 0-based
+            const paraIndex = change.paragraph_index - 1;
             if (paraIndex < 0 || paraIndex >= paragraphs.items.length) {
-                console.warn(`Invalid paragraph index: ${change.paragraph_index}`);
+                console.warn(`❌ Invalid paragraph index: ${change.paragraph_index}`);
                 return;
             }
 
@@ -1058,24 +1060,29 @@ async function applyReplace(change) {
             targetParagraph.load("text");
             await context.sync();
 
-            const paraText = targetParagraph.text;
-            const updatedText = paraText.replace(change.original_text, change.updated_text);
+            const paragraphText = targetParagraph.text || "";
 
-            // Safety check: only replace if original_text actually exists in paragraph
-            if (!paraText.includes(change.original_text)) {
-                console.warn(`Original text not found in paragraph ${change.paragraph_index}`);
+            // Normalize whitespace and line breaks
+            const normalize = (str) =>
+                str.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
+            const normalizedParaText = normalize(paragraphText);
+            const normalizedOriginal = normalize(change.original_text);
+
+            if (normalizedParaText !== normalizedOriginal) {
+                console.warn(`❌ Original text mismatch in paragraph ${change.paragraph_index}`);
+                console.warn(`Expected: ${normalizedOriginal}`);
+                console.warn(`Found   : ${normalizedParaText}`);
                 return;
             }
 
             // Replace entire paragraph content
             targetParagraph.clear();
-            targetParagraph.insertText(updatedText, Word.InsertLocation.replace);
+            targetParagraph.insertText(change.updated_text, Word.InsertLocation.replace);
             await context.sync();
 
-            console.log(`✅ Applied change to paragraph ${change.paragraph_index}`);
-
+            console.log(`✅ Successfully replaced paragraph ${change.paragraph_index}`);
         } catch (error) {
-            console.error(`❌ Error applying replace in paragraph ${change.paragraph_index}:`, error);
+            console.error(`❌ Error in applyReplace for paragraph ${change.paragraph_index}:`, error);
         }
     });
 }
