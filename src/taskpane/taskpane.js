@@ -1048,9 +1048,9 @@ async function applyReplace(change) {
             paragraphs.load("items");
             await context.sync();
 
-            const paraIndex = change.paragraph_index - 1; // Align with 0-based index
+            const paraIndex = change.paragraph_index - 1; // Backend sends 1-based index
             if (paraIndex < 0 || paraIndex >= paragraphs.items.length) {
-                console.warn(`❌ Invalid paragraph index: ${change.paragraph_index}`);
+                console.warn(`Invalid paragraph index: ${change.paragraph_index}`);
                 return;
             }
 
@@ -1058,26 +1058,38 @@ async function applyReplace(change) {
             paragraph.load("text");
             await context.sync();
 
-            // Normalize and verify text match (avoid misaligned replacements)
-            const normalize = (text) => text.trim().replace(/\s+/g, " ");
-            const currentText = normalize(paragraph.text);
-            const expectedText = normalize(change.original_text);
+            const originalRaw = change.original_text;
+            const updatedRaw = change.updated_text;
+            const currentText = paragraph.text;
 
-            if (currentText !== expectedText) {
-                console.warn(`❌ Text mismatch in paragraph ${change.paragraph_index}`);
-                console.warn(`Expected: ${expectedText}`);
-                console.warn(`Found   : ${currentText}`);
+            // Normalize for comparison (not for replacement)
+            const normalize = (text) =>
+                text
+                    .replace(/[\u201C\u201D]/g, '"') // smart quotes to "
+                    .replace(/[\u2018\u2019]/g, "'") // smart apostrophes to '
+                    .replace(/\s+/g, ' ')            // collapse whitespace
+                    .replace(/\u000b|\f|\v/g, '')    // remove vertical tab or control chars
+                    .trim();
+
+            const normCurrent = normalize(currentText);
+            const normOriginal = normalize(originalRaw);
+
+            if (!normCurrent.includes(normOriginal)) {
+                console.warn(`Paragraph ${change.paragraph_index}: Normalized original text not found.`);
                 return;
             }
 
-            // Clear and replace the entire paragraph
+            // Now apply replacement on actual raw text
+            const updatedParagraphText = currentText.replace(originalRaw, updatedRaw);
+
             paragraph.clear();
-            paragraph.insertText(change.updated_text, Word.InsertLocation.replace);
+            paragraph.insertText(updatedParagraphText, Word.InsertLocation.replace);
             await context.sync();
 
-            console.log(`✅ Paragraph ${change.paragraph_index} replaced successfully.`);
+            console.log(`✅ Successfully applied change to paragraph ${change.paragraph_index}`);
+
         } catch (error) {
-            console.error(`❌ Error in applyReplace at paragraph ${change.paragraph_index}:`, error);
+            console.error(`❌ Error applying replace in paragraph ${change.paragraph_index}:`, error);
         }
     });
 }
