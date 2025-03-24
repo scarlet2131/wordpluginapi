@@ -1043,38 +1043,43 @@ async function applyReplace(change) {
     await Word.run(async (context) => {
         try {
             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
-            await context.sync();
 
             const paragraphs = context.document.body.paragraphs;
             paragraphs.load("items");
             await context.sync();
 
-            const index = change.paragraph_index - 1;
-            if (index < 0 || index >= paragraphs.items.length) {
-                console.warn(`Invalid paragraph index: ${index}`);
+            const paraIndex = change.paragraph_index - 1; // 1-based to 0-based
+            if (paraIndex < 0 || paraIndex >= paragraphs.items.length) {
+                console.warn(`Invalid paragraph index: ${change.paragraph_index}`);
                 return;
             }
 
-            const targetParagraph = paragraphs.items[index];
+            const targetParagraph = paragraphs.items[paraIndex];
             targetParagraph.load("text");
             await context.sync();
 
-            const paragraphText = targetParagraph.text;
+            const paraText = targetParagraph.text;
+            const updatedText = paraText.replace(change.original_text, change.updated_text);
 
-            // Perform a local replacement only in this paragraph
-            const updatedText = paragraphText.replace(change.original_text.trim(), change.updated_text.trim());
+            // Safety check: only replace if original_text actually exists in paragraph
+            if (!paraText.includes(change.original_text)) {
+                console.warn(`Original text not found in paragraph ${change.paragraph_index}`);
+                return;
+            }
 
+            // Replace entire paragraph content
             targetParagraph.clear();
             targetParagraph.insertText(updatedText, Word.InsertLocation.replace);
-
             await context.sync();
-            console.log(`✅ Change ${change.change_id} applied to paragraph ${change.paragraph_index}`);
+
+            console.log(`✅ Applied change to paragraph ${change.paragraph_index}`);
 
         } catch (error) {
-            console.error(`❌ Error applying replace for change_id ${change.change_id}:`, error.message);
+            console.error(`❌ Error applying replace in paragraph ${change.paragraph_index}:`, error);
         }
     });
 }
+
 
 
 
