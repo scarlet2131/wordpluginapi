@@ -1048,23 +1048,24 @@ async function applyReplace(change) {
             paragraphs.load("items");
             await context.sync();
 
-            const compactIndex = change.paragraph_index - 1;
+            // Filter out empty paragraphs (like you do when building JSON)
+            const nonEmptyParagraphs = paragraphs.items.filter(p => p.text && p.text.trim() !== "");
 
-            if (!window.paragraphIndexMap || compactIndex >= window.paragraphIndexMap.length) {
-                console.warn(`⚠️ Cannot find real paragraph for compact index ${compactIndex + 1}`);
+            const targetIndex = change.paragraph_index - 1; // backend sends 1-based index
+
+            if (targetIndex < 0 || targetIndex >= nonEmptyParagraphs.length) {
+                console.warn(`❌ Paragraph index ${change.paragraph_index} is out of bounds.`);
                 return;
             }
 
-            const realWordIndex = window.paragraphIndexMap[compactIndex];
-            const targetParagraph = paragraphs.items[realWordIndex];
-
+            const targetParagraph = nonEmptyParagraphs[targetIndex];
             targetParagraph.load("text");
             await context.sync();
 
             const paraText = targetParagraph.text;
 
             if (!paraText.includes(change.original_text)) {
-                console.warn(`🔍 Original text not found in paragraph ${change.paragraph_index}`);
+                console.warn(`⚠️ Original text not found in paragraph ${change.paragraph_index}`);
                 return;
             }
 
@@ -1072,15 +1073,16 @@ async function applyReplace(change) {
 
             targetParagraph.clear();
             targetParagraph.insertText(updatedText, Word.InsertLocation.replace);
-
             await context.sync();
-            console.log(`✅ Replaced text in paragraph ${change.paragraph_index} (real index ${realWordIndex + 1})`);
+
+            console.log(`✅ Applied change to paragraph index ${change.paragraph_index} (non-empty only)`);
 
         } catch (error) {
-            console.error(`❌ Error applying replace in paragraph ${change.paragraph_index}:`, error);
+            console.error(`❌ Error applying replace to paragraph ${change.paragraph_index}:`, error);
         }
     });
 }
+
 
 
 async function applyAddOrUpdate(change) {
