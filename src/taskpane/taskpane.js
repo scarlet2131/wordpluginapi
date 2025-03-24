@@ -1004,39 +1004,78 @@ function displayExtractedJSON(jsonData) {
 //     });
 // }
 
+// async function applyReplace(change) {
+//     await Word.run(async (context) => {
+//         try {
+//             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
+//             await context.sync();
+
+//             const searchResults = context.document.body.search(change.original_text, {
+//                 matchCase: false,
+//                 matchWholeWord: false,
+//                 matchWildcards: false,
+//                 ignorePunct: true
+//             });
+
+//             searchResults.load("items");
+//             await context.sync();
+
+//             if (searchResults.items.length === 0) {
+//                 console.warn(`Could not find text for change_id ${change.change_id}`);
+//                 return;
+//             }
+
+//             for (let range of searchResults.items) {
+//                 range.insertText(change.updated_text, Word.InsertLocation.replace);
+//             }
+
+//             await context.sync();
+//             console.log(`✅ Change ${change.change_id} applied using search.`);
+
+//         } catch (error) {
+//             console.error(`Error applying change_id ${change.change_id}: ${error.message}`);
+//         }
+//     });
+// }
+
+
 async function applyReplace(change) {
     await Word.run(async (context) => {
         try {
             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
             await context.sync();
 
-            const searchResults = context.document.body.search(change.original_text, {
-                matchCase: false,
-                matchWholeWord: false,
-                matchWildcards: false,
-                ignorePunct: true
-            });
-
-            searchResults.load("items");
+            const paragraphs = context.document.body.paragraphs;
+            paragraphs.load("items");
             await context.sync();
 
-            if (searchResults.items.length === 0) {
-                console.warn(`Could not find text for change_id ${change.change_id}`);
+            const index = change.paragraph_index - 1;
+            if (index < 0 || index >= paragraphs.items.length) {
+                console.warn(`Invalid paragraph index: ${index}`);
                 return;
             }
 
-            for (let range of searchResults.items) {
-                range.insertText(change.updated_text, Word.InsertLocation.replace);
-            }
+            const targetParagraph = paragraphs.items[index];
+            targetParagraph.load("text");
+            await context.sync();
+
+            const paragraphText = targetParagraph.text;
+
+            // Perform a local replacement only in this paragraph
+            const updatedText = paragraphText.replace(change.original_text.trim(), change.updated_text.trim());
+
+            targetParagraph.clear();
+            targetParagraph.insertText(updatedText, Word.InsertLocation.replace);
 
             await context.sync();
-            console.log(`✅ Change ${change.change_id} applied using search.`);
+            console.log(`✅ Change ${change.change_id} applied to paragraph ${change.paragraph_index}`);
 
         } catch (error) {
-            console.error(`Error applying change_id ${change.change_id}: ${error.message}`);
+            console.error(`❌ Error applying replace for change_id ${change.change_id}:`, error.message);
         }
     });
 }
+
 
 
 async function applyAddOrUpdate(change) {
