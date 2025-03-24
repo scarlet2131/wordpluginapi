@@ -1293,7 +1293,11 @@ async function displayProposedChanges(changes) {
 
         const rejectButton = document.createElement("button");
         rejectButton.textContent = "Reject";
-        rejectButton.onclick = () => console.log(`Rejected change_id ${change.change_id}`);
+        // rejectButton.onclick = () => console.log(`Rejected change_id ${change.change_id}`);
+        rejectButton.onclick = () => {
+            console.log(`❌ Rejected change_id ${change.change_id}`);
+            changeItem.remove(); // ✨ Remove the entire block from the DOM
+        };
 
 
         changeItem.appendChild(acceptButton);
