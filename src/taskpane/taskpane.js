@@ -951,55 +951,89 @@ function displayExtractedJSON(jsonData) {
 
 
 
+// async function applyReplace(change) {
+//     await Word.run(async (context) => {
+//         try {
+//             // Step 1: Enable track changes before making modifications
+//             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
+//             await context.sync();
+
+//             // Step 2: Load all paragraphs
+//             const paragraphs = context.document.body.paragraphs;
+//             paragraphs.load("items");
+//             await context.sync();
+
+//             // Step 3: Validate paragraph index
+//             const paragraphIndex = change.paragraph_index - 1; // Convert 1-based index to 0-based
+//             if (paragraphIndex < 0 || paragraphIndex >= paragraphs.items.length) {
+//                 return;
+//             }
+
+//             const targetParagraph = paragraphs.items[paragraphIndex];
+//             targetParagraph.load("text");
+//             await context.sync();
+
+//             const paragraphText = targetParagraph.text;
+
+//             // Step 4: Normalize the texts for comparison
+//             const normalizedParagraphText = paragraphText.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
+//             const normalizedOriginalText = change.original_text.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
+
+//             // Debugging: Log normalized values
+//             //     `Normalized paragraphText: '${normalizedParagraphText}', normalizedOriginalText: '${normalizedOriginalText}'`
+//             // );
+//             const trimmedUpdatedText = change.updated_text.trim().replace(/\r?\n|\r/g, "");
+
+//             // Step 5: Check for the presence of original text
+//             if (!normalizedParagraphText.includes(normalizedOriginalText)) {
+//                 return;
+//             }
+
+//             // Step 6: Perform the replacement using raw paragraphText
+//             const updatedParagraphText = paragraphText.replace(normalizedOriginalText, trimmedUpdatedText);
+
+//             // Step 7: Update the paragraph with the replaced text
+//             targetParagraph.clear(); // Clear the current paragraph content
+//             targetParagraph.insertText(updatedParagraphText, Word.InsertLocation.replace); // Replace with updated text
+//             await context.sync();
+
+//         } catch (error) {
+//             // Step 9: Log any errors
+//             console.log(`Error applying replace for change_id ${change.change_id}: ${error.message}`);
+//         }
+//     });
+// }
+
 async function applyReplace(change) {
     await Word.run(async (context) => {
         try {
-            // Step 1: Enable track changes before making modifications
             context.document.changeTrackingMode = Word.ChangeTrackingMode.trackAll;
             await context.sync();
 
-            // Step 2: Load all paragraphs
-            const paragraphs = context.document.body.paragraphs;
-            paragraphs.load("items");
+            const searchResults = context.document.body.search(change.original_text, {
+                matchCase: false,
+                matchWholeWord: false,
+                matchWildcards: false,
+                ignorePunct: true
+            });
+
+            searchResults.load("items");
             await context.sync();
 
-            // Step 3: Validate paragraph index
-            const paragraphIndex = change.paragraph_index - 1; // Convert 1-based index to 0-based
-            if (paragraphIndex < 0 || paragraphIndex >= paragraphs.items.length) {
+            if (searchResults.items.length === 0) {
+                console.warn(`Could not find text for change_id ${change.change_id}`);
                 return;
             }
 
-            const targetParagraph = paragraphs.items[paragraphIndex];
-            targetParagraph.load("text");
-            await context.sync();
-
-            const paragraphText = targetParagraph.text;
-
-            // Step 4: Normalize the texts for comparison
-            const normalizedParagraphText = paragraphText.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
-            const normalizedOriginalText = change.original_text.trim().replace(/\r?\n|\r/g, "").replace(/\s+/g, " ");
-
-            // Debugging: Log normalized values
-            //     `Normalized paragraphText: '${normalizedParagraphText}', normalizedOriginalText: '${normalizedOriginalText}'`
-            // );
-            const trimmedUpdatedText = change.updated_text.trim().replace(/\r?\n|\r/g, "");
-
-            // Step 5: Check for the presence of original text
-            if (!normalizedParagraphText.includes(normalizedOriginalText)) {
-                return;
+            for (let range of searchResults.items) {
+                range.insertText(change.updated_text, Word.InsertLocation.replace);
             }
 
-            // Step 6: Perform the replacement using raw paragraphText
-            const updatedParagraphText = paragraphText.replace(normalizedOriginalText, trimmedUpdatedText);
-
-            // Step 7: Update the paragraph with the replaced text
-            targetParagraph.clear(); // Clear the current paragraph content
-            targetParagraph.insertText(updatedParagraphText, Word.InsertLocation.replace); // Replace with updated text
             await context.sync();
+            console.log(`✅ Change ${change.change_id} applied using search.`);
 
         } catch (error) {
-            // Step 9: Log any errors
-            console.log(`Error applying replace for change_id ${change.change_id}: ${error.message}`);
+            console.error(`Error applying change_id ${change.change_id}: ${error.message}`);
         }
     });
 }
