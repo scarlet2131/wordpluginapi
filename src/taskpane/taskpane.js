@@ -235,49 +235,158 @@ function handleDocxUpload(event) {
 
 
 // Generate dynamic form fields for each placeholder
+// function generateEditFields(placeholders) {
+//     const container = document.getElementById("editPlaceholderFields");
+//     container.innerHTML = ""; // Clear previous fields
+//     container.style.display = 'block';
+//     if (!placeholders.length) {
+//         container.innerHTML = "<p>No placeholders found.</p>";
+//         return;
+//     }
+//     placeholders.forEach((ph) => {
+//         const div = document.createElement("div");
+//         div.className = "form-group";
+
+//         const label = document.createElement("label");
+//         label.setAttribute("for", `placeholder-${ph}`);
+//         label.textContent = ph + ": ";
+
+//         const input = document.createElement("input");
+//         input.type = "text";
+//         input.id = `placeholder-${ph}`;
+//         input.placeholder = `Enter ${ph}`;
+
+//         div.appendChild(label);
+//         div.appendChild(input);
+//         container.appendChild(div);
+//     });
+// }
+
 function generateEditFields(placeholders) {
     const container = document.getElementById("editPlaceholderFields");
     container.innerHTML = ""; // Clear previous fields
     container.style.display = 'block';
+
     if (!placeholders.length) {
         container.innerHTML = "<p>No placeholders found.</p>";
         return;
     }
+
+    const dropdown = document.createElement("select");
+    dropdown.id = "placeholderDropdown";
+    dropdown.className = "form-control";
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "-- Select a placeholder to edit --";
+    dropdown.appendChild(defaultOption);
+
     placeholders.forEach((ph) => {
-        const div = document.createElement("div");
-        div.className = "form-group";
+        const option = document.createElement("option");
+        option.value = ph;
+        option.textContent = ph;
+        dropdown.appendChild(option);
+    });
+
+    const inputWrapper = document.createElement("div");
+    inputWrapper.id = "editFieldWrapper";
+    inputWrapper.style.marginTop = "10px";
+
+    container.appendChild(dropdown);
+    container.appendChild(inputWrapper);
+
+    // Event listener for dropdown change
+    dropdown.addEventListener("change", (event) => {
+        const selected = event.target.value;
+        inputWrapper.innerHTML = ""; // Clear previous input
+
+        if (!selected) return;
 
         const label = document.createElement("label");
-        label.setAttribute("for", `placeholder-${ph}`);
-        label.textContent = ph + ": ";
+        label.textContent = `Edit value for ${selected}:`;
 
         const input = document.createElement("input");
         input.type = "text";
-        input.id = `placeholder-${ph}`;
-        input.placeholder = `Enter ${ph}`;
+        input.id = `placeholder-${selected}`;
+        input.value = currentPlaceholders[selected] || "";
+        input.className = "form-control";
+        input.placeholder = `Enter ${selected}`;
 
-        div.appendChild(label);
-        div.appendChild(input);
-        container.appendChild(div);
+        // Save value on input change
+        input.addEventListener("input", () => {
+            currentPlaceholders[selected] = input.value;
+        });
+
+        inputWrapper.appendChild(label);
+        inputWrapper.appendChild(input);
     });
 }
 
+
+// Function to replace placeholders in the document with user input
+// async function mergeAndInsertTemplate() {
+//     try {
+//         // Replace placeholders in the document
+//         await Word.run(async (context) => {
+//             // Extract placeholders from the document
+//             const placeholders = await extractPlaceholdersFromDocument(context);
+
+//             // Gather user input values for each placeholder
+//             const data = {};
+//             placeholders.forEach((ph) => {
+//                 const input = document.getElementById(`placeholder-${ph}`);
+//                 data[ph] = input ? input.value : "";
+//             });
+
+//             // Iterate through sections (headers, body, and footers)
+//             const sections = context.document.sections;
+//             sections.load("items");
+//             await context.sync();
+
+//             for (const section of sections.items) {
+//                 const parts = [
+//                     section.getHeader("Primary"),
+//                     section.body,
+//                     section.getFooter("Primary"),
+//                 ];
+
+//                 for (const part of parts) {
+//                     part.load("text");
+//                     await context.sync();
+
+//                     let content = part.text || "";
+
+//                     // Replace placeholders with user input
+//                     for (let key in data) {
+//                         const regex = new RegExp(`{{${key}}}`, "g");
+//                         content = content.replace(regex, data[key]);
+//                     }
+
+//                     // Clear the part and insert the updated content
+//                     part.clear();
+//                     part.insertText(content, Word.InsertLocation.replace);
+//                 }
+//             }
+
+//             await context.sync();
+//         });
+//     } catch (error) {
+//         console.error("Error during merge and render:", error);
+//     }
+// }
 // Function to replace placeholders in the document with user input
 async function mergeAndInsertTemplate() {
     try {
-        // Replace placeholders in the document
         await Word.run(async (context) => {
             // Extract placeholders from the document
             const placeholders = await extractPlaceholdersFromDocument(context);
 
-            // Gather user input values for each placeholder
+            // Use values from currentPlaceholders (built via dropdown + input)
             const data = {};
-            placeholders.forEach((ph) => {
-                const input = document.getElementById(`placeholder-${ph}`);
-                data[ph] = input ? input.value : "";
+            placeholders.forEach(ph => {
+                data[ph] = currentPlaceholders[ph] || "";
             });
 
-            // Iterate through sections (headers, body, and footers)
+            // Load document sections
             const sections = context.document.sections;
             sections.load("items");
             await context.sync();
@@ -301,18 +410,24 @@ async function mergeAndInsertTemplate() {
                         content = content.replace(regex, data[key]);
                     }
 
-                    // Clear the part and insert the updated content
+                    // Clear the content and insert updated text
                     part.clear();
                     part.insertText(content, Word.InsertLocation.replace);
                 }
             }
 
             await context.sync();
+            console.log("Template merged and placeholders replaced.");
         });
     } catch (error) {
         console.error("Error during merge and render:", error);
     }
 }
+
+
+
+
+
 
 // Helper function to extract placeholders from the document
 async function extractPlaceholdersFromDocument(context) {
