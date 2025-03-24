@@ -428,7 +428,6 @@ function generateEditFields(placeholders) {
 async function mergeAndInsertTemplate() {
     try {
         await Word.run(async (context) => {
-            // Get edited placeholders only
             const editedKeys = Object.keys(currentPlaceholders);
 
             if (editedKeys.length === 0) {
@@ -436,44 +435,31 @@ async function mergeAndInsertTemplate() {
                 return;
             }
 
-            const sections = context.document.sections;
-            sections.load("items");
-            await context.sync();
+            for (let key of editedKeys) {
+                const value = currentPlaceholders[key];
 
-            for (const section of sections.items) {
-                const parts = [
-                    section.getHeader("Primary"),
-                    section.body,
-                    section.getFooter("Primary"),
-                ];
+                // Search for the exact placeholder (e.g., {{EffectiveDate}})
+                const searchResults = context.document.body.search(`{{${key}}}`, {
+                    matchCase: false,
+                    matchWholeWord: false,
+                    matchWildcards: false
+                });
 
-                for (const part of parts) {
-                    part.load("text");
-                    await context.sync();
+                searchResults.load("items");
+                await context.sync();
 
-                    let content = part.text || "";
-
-                    // Only replace edited placeholders
-                    for (let key of editedKeys) {
-                        const regex = new RegExp(`{{${key}}}`, "g");
-                        content = content.replace(regex, currentPlaceholders[key]);
-                    }
-
-                    // Clear the part and reinsert updated content
-                    part.clear();
-                    part.insertText(content, Word.InsertLocation.replace);
+                for (let range of searchResults.items) {
+                    range.insertText(value, Word.InsertLocation.replace);
                 }
             }
 
             await context.sync();
-            console.log("Only edited placeholders were merged into the document.");
+            console.log("Updated only selected placeholders without affecting formatting.");
         });
     } catch (error) {
         console.error("Error during merge and insert:", error);
     }
 }
-
-
 
 
 
